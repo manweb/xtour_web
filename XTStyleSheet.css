@@ -1,0 +1,223 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+}
+
+.header_link:link {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.header_link:visited {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.header_link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.header_link:selected {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.header_div {
+    height: 100px;
+    background-image: url('header_div_background.png');
+    background-repeat: repeat-x;
+    border: none;
+    width: 100%;
+    margin: 0px auto;
+    position: fixed;
+    z-index: 100;
+    left: 0px;
+}
+
+.body_div {
+    width: 100%;
+    background: #f2f2f2;
+    height: 2000px;
+    margin: 100px auto;
+    border: none;
+    position: absolute;
+}
+
+.TableItemTop
+{
+    background-image: url('table_background_top.png');
+    background-size: 10px 10px;
+    background-repeat: repeat-x;
+}
+
+.TableItemTopLeft
+{
+    background-image: url('table_background_upper_left.png');
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+}
+
+.TableItemMiddleLeft
+{
+    background-image: url('table_background_middle_left.png');
+    background-size: 10px 10px;
+    background-repeat: repeat-y;
+}
+
+.TableItemCenter
+{
+    background-color: #ffffff;
+}
+
+.TableItemBottomLeft
+{
+    background-image: url('table_background_lower_left.png');
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+    background-position: top;
+}
+
+.TableItemBottom
+{
+    background-image: url('table_background_bottom.png');
+    background-size: 10px 10px;
+    background-repeat: repeat-x;
+}
+
+.TableItemBottomRight
+{
+    background-image: url('table_background_lower_right.png');
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+}
+
+.TableItemMiddleRight
+{
+    background-image: url('table_background_middle_right.png');
+    background-size: 10px 10px;
+    background-repeat: repeat-y;
+}
+
+.TableItemTopRight
+{
+    background-image: url('table_background_upper_right.png');
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+}
+
+.div_overlay
+{
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    position: fixed;
+    z-index: 101;
+}
+
+.div_overlay_box
+{
+    background: rgba(0, 0, 0, 0);
+    width: 300px;
+    height: 300px;
+    top: 50%;
+    left: 50%;
+    margin-left: -150px;
+    margin-top: -150px;
+    position: fixed;
+    display: none;
+    z-index: 102;
+}
+
+.div_box_table
+{
+    background-size: 15px 15px;
+    width: 15px;
+    height: 15px;
+}
+
+.InputField
+{
+    border-style: solid;
+    border-width: 2px;
+    border-color: #C9C9C9;
+    font-family: helvetica, arial, sans serif;
+    font-size: 12;
+    padding-left: 0px;
+    height:28px;
+    outline:none;
+    text-indent: 4px;
+}
+
+.InputButton
+{
+    background-image: 	url('button_background.png');
+	background-repeat:	no-repeat;
+	background-color:	transparent;
+    background-size: 80px 25px;
+	height:			25px;
+	width:			80px;
+	border:			none;
+    font-family: helvetica;
+    color: #ffffff;
+    outline:none;
+}
+
+.SubmitButton
+{
+	background-image: 	url(search.png);
+	background-repeat:	no-repeat;
+	background-color:	transparent;
+    background-size: 28px 28px;
+	height:			28px;
+	width:			28px;
+	border:			none;
+	text-indent:		-999em;
+    outline:none;
+    margin-left: 2px;
+}
+
+.HeaderFont
+{
+    font-family: helvetica, sans-serif;
+    font-size: 14;
+    font-weight: 100;
+    color: #ffffff;
+}
+
+.FileUploadWrapper
+{
+    height: 60px;
+    width: 60px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    background-image: url('add_profile_picture.png');
+    background-size: 60px 60px;
+}
+
+.FileUpload
+{
+    cursor: pointer;
+    height: 100%;
+    position:absolute;
+    top: 0;
+    right: 0;
+    font-size:50px;
+    opacity: 0;
+    -moz-opacity: 0;
+    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0)
+}
+
+.DivLoading
+{
+    width: 80px;
+    height: 27px;
+    position: relative;
+    top: 0;
+    left: 10;
+}
