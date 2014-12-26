@@ -25,7 +25,7 @@ html, body {
 
 .header_div {
     height: 100px;
-    background-image: url('header_div_background.png');
+    background-image: url('images/header_div_background.png');
     background-repeat: repeat-x;
     border: none;
     width: 100%;
@@ -44,23 +44,97 @@ html, body {
     position: absolute;
 }
 
+.feedbox_div {
+    position: relative;
+    border: 1px solid;
+    border-radius: 5px;
+    border-color: #dbdbdb;
+    background-color: #FFFFFF;
+    width: 500px;
+    margin-left: 0px;
+    transition: margin-left .5s ease;
+    -moz-transition: margin-left .5s ease; /* Firefox 4 */
+    -webkit-transition: margin-left .5s ease; /* Safari and Chrome */
+    -o-transition: margin-left .5s ease; /* Opera */
+}
+
+.feedbox_div:hover {
+    margin-left: 5px;
+    border-color: #299dc7;
+    transition: margin-left 0s ease;
+    -moz-transition: margin-left 0s ease; /* Firefox 4 */
+    -webkit-transition: margin-left 0s ease; /* Safari and Chrome */
+    -o-transition: margin-left 0s ease; /* Opera */
+}
+
+.comment_container_div {
+    position: absolute;
+    display: table;
+    border: 0px none;
+    left: 25px;
+}
+
+.comment_div {
+    border: 1px solid;
+    border-color: #dbdbdb;
+}
+
+.comment_pic_div {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+}
+
+.map_div {
+    position: relative;
+    width: 150px;
+    height: 96px;
+    background-image: url('images/map_ch2.png');
+    background-size: 150px 96px;
+}
+
+.comment_table_top {
+    background-image: url('images/comment_background_lineH.png'), url('images/comment_background_lineH2.png');
+    background-repeat: repeat-x, no-repeat;
+    background-position-x: left, right;
+    background-size: 30px 30px, 30px 30px;
+}
+
+.comment_table_left {
+    background-image: url('images/comment_background_lineV.png'), url('images/comment_background_lineV2.png');
+    background-repeat: repeat-y, no-repeat;
+    background-position-y: top, bottom;
+    background-size: 30px 30px, 30px 30px;
+}
+
+.comment_table_middle {
+    border-bottom: 1px solid #dbdbdb;
+    border-right: 1px solid #dbdbdb;
+}
+
+.comment_table_top_left {
+    background-image: url('images/comment_background_profile.png');
+    background-repeat: no-repeat;
+    background-size: 30px 30px;
+}
+
 .TableItemTop
 {
-    background-image: url('table_background_top.png');
+    background-image: url('images/table_background_top.png');
     background-size: 10px 10px;
     background-repeat: repeat-x;
 }
 
 .TableItemTopLeft
 {
-    background-image: url('table_background_upper_left.png');
+    background-image: url('images/table_background_upper_left.png');
     background-size: 10px 10px;
     background-repeat: no-repeat;
 }
 
 .TableItemMiddleLeft
 {
-    background-image: url('table_background_middle_left.png');
+    background-image: url('images/table_background_middle_left.png');
     background-size: 10px 10px;
     background-repeat: repeat-y;
 }
@@ -72,7 +146,7 @@ html, body {
 
 .TableItemBottomLeft
 {
-    background-image: url('table_background_lower_left.png');
+    background-image: url('images/table_background_lower_left.png');
     background-size: 10px 10px;
     background-repeat: no-repeat;
     background-position: top;
@@ -80,30 +154,143 @@ html, body {
 
 .TableItemBottom
 {
-    background-image: url('table_background_bottom.png');
+    background-image: url('images/table_background_bottom.png');
     background-size: 10px 10px;
     background-repeat: repeat-x;
 }
 
 .TableItemBottomRight
 {
-    background-image: url('table_background_lower_right.png');
+    background-image: url('images/table_background_lower_right.png');
     background-size: 10px 10px;
     background-repeat: no-repeat;
 }
 
 .TableItemMiddleRight
 {
-    background-image: url('table_background_middle_right.png');
+    background-image: url('images/table_background_middle_right.png');
     background-size: 10px 10px;
     background-repeat: repeat-y;
 }
 
 .TableItemTopRight
 {
-    background-image: url('table_background_upper_right.png');
+    background-image: url('images/table_background_upper_right.png');
     background-size: 10px 10px;
     background-repeat: no-repeat;
+}
+
+.TableItemRight
+{
+    background-color: #fdfdfd;
+    background-image: url('images/feed_box_details.png'), url('images/feed_box_details.png');
+    background-size: 100%, 100%;
+    background-position: top left, bottom left;
+    background-repeat: no-repeat, no-repeat;
+}
+
+.TableCommentTop
+{
+    background-image: url('images/table_comment_top.png');
+    background-size: 20px 20px;
+    background-repeat: repeat-x;
+}
+
+.TableCommentTopLeft
+{
+    background-image: url('images/table_comment_upper_left.png');
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+}
+
+.TableCommentMiddleLeft
+{
+    background-image: url('images/table_comment_middle_left.png');
+    background-size: 20px 2px;
+    background-repeat: repeat-y;
+}
+
+.TableCommentCenter
+{
+    background-color: #f5f8fb;
+}
+
+.TableCommentBottomLeft
+{
+    background-image: url('images/table_comment_lower_left.png');
+    background-size: 20px 5px;
+    background-repeat: no-repeat;
+    background-position: top;
+}
+
+.TableCommentBottom
+{
+    background-image: url('images/table_comment_bottom.png');
+    background-size: 20px 5px;
+    background-repeat: repeat-x;
+}
+
+.TableCommentBottomRight
+{
+    background-image: url('images/table_comment_lower_right.png');
+    background-size: 20px 5px;
+    background-repeat: no-repeat;
+}
+
+.TableCommentMiddleRight
+{
+    background-image: url('images/table_comment_middle_right.png');
+    background-size: 20px 2px;
+    background-repeat: repeat-y;
+}
+
+.TableCommentTopRight
+{
+    background-image: url('images/table_comment_upper_right.png');
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+}
+
+.CommentTopLeft
+{
+    background-image: url('images/comment_arrow.png');
+    background-size: 20px 20px;
+    background-repeat: no-repeat;
+    border: none;
+}
+
+.CommentTop
+{
+    border-left: 2px solid #e4e4e4;
+    border-right: 2px solid #e4e4e4;
+    border-top: 2px solid #e4e4e4;
+    border-bottom: none;
+    vertical-align: middle;
+    padding-left: 5px;
+}
+
+.CommentMiddle
+{
+    border-left: 2px solid #e4e4e4;
+    border-right: 2px solid #e4e4e4;
+    border-top: none;
+    border-bottom: 2px solid #e4e4e4;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.CommentMiddle2
+{
+    border-left: 2px solid #e4e4e4;
+    border-right: 2px solid #e4e4e4;
+    border-top: 2px solid #e4e4e4;
+    border-bottom: 2px solid #e4e4e4;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 .div_overlay
@@ -155,7 +342,7 @@ html, body {
 
 .InputButton
 {
-    background-image: 	url('button_background.png');
+    background-image: 	url('images/button_background.png');
 	background-repeat:	no-repeat;
 	background-color:	transparent;
     background-size: 80px 25px;
@@ -169,7 +356,7 @@ html, body {
 
 .SubmitButton
 {
-	background-image: 	url(search.png);
+	background-image: 	url(images/search.png);
 	background-repeat:	no-repeat;
 	background-color:	transparent;
     background-size: 28px 28px;
@@ -189,6 +376,37 @@ html, body {
     color: #ffffff;
 }
 
+.CommentHeaderFont
+{
+    font-family: helvetica, sans-serif;
+    font-size: 10;
+    font-weight: 100;
+    color: #C9C9C9;
+}
+
+.CommentFont
+{
+    font-family: helvetica, sans-serif;
+    font-size: 12;
+    font-weight: 100;
+    color: #000000;
+}
+
+.CommentTextarea
+{
+    background-image: url('images/ShiftEnterKey.png');
+    background-size: 50px 18px;
+    background-repeat: no-repeat;
+    background-position: right bottom;
+    width: 100%;
+    height: 20px;
+    font-family: helvetica, sans-serif;
+    border: none;
+    background-color: #ffffff;
+    outline: none;
+    resize: none;
+}
+
 .FileUploadWrapper
 {
     height: 60px;
@@ -196,7 +414,7 @@ html, body {
     overflow: hidden;
     position: relative;
     cursor: pointer;
-    background-image: url('add_profile_picture.png');
+    background-image: url('images/add_profile_picture.png');
     background-size: 60px 60px;
 }
 

@@ -11,7 +11,9 @@
     
     if (!$DB->VerifyUser($uid, md5($pwd))) {echo "false"; return 0;}
     
-    echo "true";
+    $userID = $DB->GetUserID($uid);
+    
+    echo $userID;
     
     return 1;
 ?>
