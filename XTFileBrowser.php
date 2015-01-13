@@ -11,7 +11,7 @@
             $dir = "users/".$uid."/tours/".$tid."/images/";
             if ($handle = opendir($dir)) {
                 while (false !== ($file = readdir($handle))) {
-                    if ($file != "." && $file != ".." && strtolower(substr($file, strpos($file, '.') + 1)) == 'jpeg' && !strpos($file, '_thumb.jpeg')) {
+                    if ($file != "." && $file != ".." && strtolower(substr($file, strpos($file, '.') + 1)) == 'jpg' && !strpos($file, '_thumb.jpg')) {
                         array_push($images,$dir.$file);
                     }
                 }

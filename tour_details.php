@@ -3,7 +3,7 @@
     
     $box = new XTInfoBox();
     
-    $content = $_GET['tid']."<br><button id='GMaps' onclick='initialize()'>Google</button><button id='GeoAdmin' onclick='init()'>Swisstopo</button><button id='Chart' onclick='drawChart()'>Chart</button>";
+    $content = $_GET['tid']."<br><button id='GMaps' onclick='initialize()'>Google</button><button id='GeoAdmin' onclick='init()'>Swisstopo</button><button id='Chart' onclick='drawChart(".$_GET['tid'].")'>Chart</button>";
     
     $box->PrintBoxWithContent($content, 500);
     

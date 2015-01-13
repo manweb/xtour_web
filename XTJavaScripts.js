@@ -47,9 +47,9 @@ function init() {
     map.addLayer(vector);
 }
 
-function drawChart() {
+function drawChart(tid) {
     var jsonData = $.ajax({
-                          url: "http://www.xtour.ch/get_elevation_profile.php",
+                          url: "http://www.xtour.ch/get_elevation_profile.php?tid=" + tid,
                           dataType:"json",
                           async: false
                           }).responseText;
@@ -58,9 +58,9 @@ function drawChart() {
     var data = new google.visualization.DataTable(jsonData);
     
     // Instantiate and draw our chart, passing in some options.
-    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
     
-    var options = {curveType: 'function', width: 480, height: 280}
+    var options = {dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 280}
     chart.draw(data, options);
 }
 
@@ -146,7 +146,7 @@ function ValidateLogin() {
     xmlhttp.send();
 }
 
-function LoadMainDiv(content, tid) {
+function LoadMainDiv(content, tid, file) {
     document.getElementById('MainContent').innerHTML = "<p align='left' style='padding-left:210px; padding-top:50px'><img src='images/loading.gif' width='80'></p>";
     
     if (window.XMLHttpRequest)
@@ -162,7 +162,7 @@ function LoadMainDiv(content, tid) {
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
         {
             document.getElementById('MainContent').innerHTML=xmlhttp.responseText;
-            if (content.indexOf("tour_details.php") > -1 && tid) {initialize(tid);}
+            if (content.indexOf("tour_details.php") > -1 && tid) {initialize(file); drawChart(tid);}
         }
     }
     xmlhttp.open('GET',content,true);
@@ -184,11 +184,11 @@ function AddHistoryEntry(path)
     history.pushState(stateObj, "new page", path);
 }
 
-function ShowTourDetails(tid, path, hist)
+function ShowTourDetails(tid, file, content, hist)
 {
     var el = document.activeElement;
     
-    if (!(el.tagName.toLowerCase() == 'textarea')) {LoadMainDiv(path,tid); AddHistoryEntry(hist);}
+    if (!(el.tagName.toLowerCase() == 'textarea')) {LoadMainDiv(content,tid,file); AddHistoryEntry(hist);}
 }
 
 function textarea_resize(t) {
@@ -198,9 +198,69 @@ function textarea_resize(t) {
     t.style.height = (t.scrollHeight  + offset ) + 'px';
 }
 
-function captureEnter()
+function captureEnter(tid, width, img, name, date, comment)
 {
     if (window.event.keyCode == 13 && window.event.shiftKey) {
-        alert("Enter");
+        date *= 1000;
+        
+        var d = new Date(date);
+        var day = d.getDate();
+        if (day < 10) {day = "0" + day;}
+        var month = d.getMonth() + 1;
+        if (month < 10) {month = "0" + month;}
+        var hours = d.getHours();
+        if (hours < 10) {hours = "0" + hours;}
+        var minutes = d.getMinutes();
+        if (minutes < 10) {minutes = "0" + minutes;}
+        var seconds = d.getSeconds();
+        if (seconds < 10) {seconds = "0" + seconds;}
+        var formattedDate = day + "." + month + "." + d.getFullYear() + " " + hours + ":" + minutes + ":" + seconds;
+        var comment_text = comment.value;
+        
+        var content = "<table width='" + width + "' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+        content += "<tr>\n";
+        content += "<td width='30' height='30' align='center' valign='middle'><img src='" + img + "' width='28'></td>\n";
+        content += "<td class='comment_table_top' width='" + (width - 30) + "' valign='bottom'><p style='margin-left: 5px; margin-bottom: 0px;'><font class='CommentHeaderFont'>" + name + " am " + formattedDate + "</font></p></td>\n";
+        content += "</tr>\n";
+        content += "<tr>\n";
+        content += "<td class='comment_table_left' width='30' valign='top'></td>\n";
+        content += "<td class='comment_table_middle' width='420'><p style='margin-top: 5px; margin-bottom: 5px; margin-left: 0px; margin-right: 5px;'><font class='CommentFont'>" + comment_text + "</font></p></td>\n";
+        content += "</tr>\n";
+        content += "</table>\n";
+        
+        var e = "#" + tid + "_div";
+        $(content).hide().appendTo(e).fadeIn(1000);
+        
+        comment.value = "";
     }
+}
+
+function LoadMovingDiv(e)
+{
+    var src = e.src;
+    var d = document.getElementById('div_moving');
+    
+    var image = src.replace("_thumb","");
+    
+    d.innerHTML = "<img style='border-width: 1px; border-style: solid; border-color: #000000;' src='" + image + "' width='400px'>";
+    
+    var rect = e.getBoundingClientRect();
+    var posX = rect.left;
+    var posY = rect.bottom;
+    var dX = rect.right - rect.left;
+    d.style.visibility = 'visible';
+    d.style.left = (posX + dX/2 - 200) + 'px';
+    d.style.top = posY + 'px';
+}
+
+function MoveMovingDiv()
+{
+    var d = document.getElementById('div_moving');
+    d.style.left = event.screenX + 'px';
+    d.style.top = event.screenY + 'px';
+}
+
+function HideMovingDiv()
+{
+    document.getElementById('div_moving').style.visibility = 'hidden';
 }

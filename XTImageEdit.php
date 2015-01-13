@@ -59,7 +59,7 @@
                 imagecopyresampled($imgNew, $img, 0, 0, 0, 0, $width+1, $width+1, $imgWidth, $imgWidth);
             }
             
-            $fileName = str_replace(".jpeg","_thumb.jpeg",$image);
+            $fileName = str_replace(".jpg","_thumb.jpg",$image);
             
             imagejpeg($imgNew, $fileName);
             imagedestroy($img);

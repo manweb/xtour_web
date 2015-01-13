@@ -312,14 +312,23 @@
         function GetAltitudeTable() {
             $arr = array();
             
-            $arr['cols'][] = array('label' => 'time', 'type' => 'string');
+            $arr['cols'][] = array('label' => 'time', 'type' => 'number');
             $arr['cols'][] = array('label' => 'altitude', 'type' => 'number');
             
             if (!$this->TrackPointArray) {return 0;}
             
+            $startTime = $this->GetStartTime();
+            $unixStartTime = strtotime($startTime);
+            
             foreach ($this->TrackPointArray as $TrackPoint) {
                 if ($TrackPoint["elevation"] == -999) {continue;}
-                $arr['rows'][]['c'] = array(array('v' => $TrackPoint["time"]),array('v' => $TrackPoint["elevation"]));
+                $time = strtotime($TrackPoint["time"]);
+                $diff = $time - $unixStartTime;
+                $hours = floor($diff/3600);
+                $minutes = floor(($diff/3600 - $hours)*60);
+                $seconds = (($diff/3600 - $hours)*60 - $minutes)*60;
+                $formattedTime = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+                $arr['rows'][]['c'] = array(array('v' => $diff),array('v' => $TrackPoint["elevation"]));
             }
             
             return json_encode($arr);

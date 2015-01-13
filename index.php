@@ -58,6 +58,8 @@ window.onpopstate = function(event) {
 
 </div>
 
+<div class="div_moving", id="div_moving"></div>
+
 <div class="header_div">
 
 <table width='100%' height='100' dalign='center' border='0' cellpadding='0' cellspacing='0'>

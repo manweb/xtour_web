@@ -55,6 +55,17 @@
             return $row['id'];
         }
         
+        function GetUserNameForID($id) {
+            $query = sprintf("select * from members where id='%s'", $id);
+            
+            $result = mysql_query($query);
+            $row = mysql_fetch_assoc($result);
+            
+            $name = $row['first_name']." ".$row['last_name'];
+            
+            return $name;
+        }
+        
         function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude) {
             $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude')";
             
@@ -105,7 +116,7 @@
         }
         
         function LoadLatestTours($limit) {
-            $query = "select * from tours where sub_id='0' and tour_type='0' order by date limit $limit";
+            $query = "select * from tours where sub_id='0' and tour_type='0' order by date desc limit $limit";
             
             $result = mysql_query($query);
             if (!$result) {return 0;}

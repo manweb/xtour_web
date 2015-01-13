@@ -15,7 +15,18 @@
     return;
     
     function UploadImage($fileNameTMP, $fileName, $user_id) {
+        $regex = '/^(20[0-9]{2}[0,1][0-9][0-3][0-9][0-2][0-9][0-5][0-9][0-5][0-9][0-9]{4})_([0-9]{3})/';
+        preg_match($regex, $fileName, $matches);
         
+        if (sizeof($matches) != 3) {return 0;}
+        $tour_id = $matches[1];
+        $count = $matches[2];
+        
+        $path = "users/".$user_id."/tours/".$tour_id."/images/";
+        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return 0;}}
+        
+        $result = move_uploaded_file($fileNameTMP, $path.$fileName);
+        if (!$result) {return 0;}
     }
     
     function UploadGPX($fileNameTMP, $fileName, $user_id) {

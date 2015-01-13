@@ -12,7 +12,8 @@
     
     while ($tour = $DB->NextTour()) {
         $img = "users/".$tour["user_id"]."/profile.png";
-        $IB->PrintFeedBox2(500, $img, $tour["tour_id"], $tour["date"], $tour["total_time"], $tour["total_altitude"], $tour["total_distance"], $tour["start_lat"], $tour["start_lon"]);
+        $userName = $DB->GetUserNameForID($tour["user_id"]);
+        $IB->PrintFeedBox2(500, $img, $userName, $tour["tour_id"], $tour["date"], $tour["total_time"], $tour["total_altitude"], $tour["total_distance"], $tour["start_lat"], $tour["start_lon"]);
     }
     
     /*$cont = "<button id='GMaps' onclick='initialize()'>Google</button>".

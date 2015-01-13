@@ -141,7 +141,7 @@
             echo "</table>\n";
         }
         
-        function PrintFeedBox2($width, $img, $tid, $date, $time, $altitude, $distance, $lat, $lon)
+        function PrintFeedBox2($width, $img, $name, $tid, $date, $time, $altitude, $distance, $lat, $lon)
         {
             $uid = 1000;
             $imageEdit = new XTImageEdit();
@@ -165,9 +165,9 @@
             
             $time2 = sprintf("%.0fh %2.0fm %2.0fs", $h, $m, $s);
             
-            echo "<div class='feedbox_div' onclick='ShowTourDetails(\"$mergedFile\", \"tour_details.php?tid=$tid\", \"/tours/$tid/\")'>\n";
+            echo "<div class='feedbox_div' onclick='ShowTourDetails(\"$tid\", \"$mergedFile\", \"tour_details.php?tid=$tid\", \"/tours/$tid/\")'>\n";
             echo "<p style='margin-top: 2px; margin-bottom: 5px; margin-right: 10px; margin-left: 10px;'>\n";
-            echo "<font class='CommentHeaderFont'>Name am ".$day.", ".$date2."</font>\n";
+            echo "<font class='CommentHeaderFont'>".$name." am ".$day.", ".$date2."</font>\n";
             echo "</p>\n";
             
             echo "<table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
@@ -197,9 +197,9 @@
             if ($images) {
                 for ($i = 0; $i < $n; $i++) {
                     $img = $images[$i];
-                    $img2 = str_replace(".jpeg","_thumb.jpeg",$img);
-                    if (!file_exists($img2)) {$imageEdit->GetSquareImage($img,45);}
-                    echo "<img src='".$img2."' width='45px'>\n";
+                    $img2 = str_replace(".jpg","_thumb.jpg",$img);
+                    if (!file_exists($img2)) {$imageEdit->GetSquareImage($img,200);}
+                    echo "<img src='".$img2."' width='45px' onmouseover='LoadMovingDiv(this)'; onmouseout='HideMovingDiv()';>\n";
                 }
                 
                 if ($nImages > 3) {
@@ -213,6 +213,8 @@
             echo "</td>\n";
             echo "</tr>\n";
             echo "</table>\n";
+            
+            echo "<div id='".$tid."_div' style='position: relative;'>\n";
             
             // Print comments for this tour
             $DB = new XTDatabase();
@@ -228,9 +230,11 @@
                 $this->PrintComment(450, $img, $comment["name"], $comment["date"], $comment["comment"]);
             }
             
+            echo "</div>\n";
+            
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
             
-            $this->PrintCommentTextfield(450, 'images/profile_icon_grey.png');
+            $this->PrintCommentTextfield(450, 'images/profile_icon_grey.png', $tid);
             
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
             
@@ -322,7 +326,7 @@
             
         }
         
-        function PrintCommentTextfield($width, $img) {
+        function PrintCommentTextfield($width, $img, $tid) {
             /*echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td width='20' height='20' valign='top'><img src='".$img."' width='20'></td>\n";
@@ -351,6 +355,8 @@
             echo "</tr>\n";
             echo "</table>\n";*/
             
+            $date = time();
+            
             echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td width='30' height='30' valign='top'><img src='".$img."' width='30'></td>\n";
@@ -358,7 +364,7 @@
             echo "</tr>\n";
             echo "<tr>\n";
             echo "<td class='comment_table_left' width='30' valign='top'></td>\n";
-            echo "<td class='comment_table_middle' width='".($width-30)."'><p style='margin-top: 0px; margin-bottom: 5px; margin-left: 0px; margin-right: 5px;'><textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter()'></textarea></p></td>\n";
+            echo "<td class='comment_table_middle' width='".($width-30)."'><p style='margin-top: 0px; margin-bottom: 5px; margin-left: 0px; margin-right: 5px;'><textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(".$tid.",450,\"images/profile_icon_grey.png\",\"Name\",".$date.",this)'></textarea></p></td>\n";
             echo "</tr>\n";
             echo "</table>\n";
         }

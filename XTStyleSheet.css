@@ -327,6 +327,19 @@ html, body {
     height: 15px;
 }
 
+.div_moving
+{
+    display: block;
+    visibility: hidden;
+    position: fixed;
+    z-index: 103;
+    padding-top: 10px;
+    background-image: url('images/moving_div_background.png');
+    background-size: 50px 10px;
+    background-repeat: no-repeat;
+    background-position: center top;
+}
+
 .InputField
 {
     border-style: solid;
