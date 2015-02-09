@@ -4,6 +4,7 @@
     include_once('XTDatabase.php');
     include_once('XTFileBrowser.php');
     include_once('XTGPXParser.php');
+    include_once('XTUtilites.php');
     
     class XTInfoBox {
         var $userID;
@@ -141,7 +142,7 @@
             echo "</table>\n";
         }
         
-        function PrintFeedBox2($width, $img, $name, $tid, $date, $time, $altitude, $distance, $lat, $lon)
+        function PrintFeedBox2($width, $img, $name, $tid, $date, $time, $altitude, $distance, $lat, $lon, $country, $province)
         {
             $uid = 1000;
             $imageEdit = new XTImageEdit();
@@ -152,7 +153,10 @@
             $nImages = $fileBrowser->GetNumImages();
             
             $mergedFile = $fileBrowser->GetMergedFile($tid);
-            if (!$mergedFile) {$parser->MergeAndConvertToKML($tid);}
+            if (!$mergedFile) {$mergedFile = $parser->MergeAndConvertToKML($tid);}
+            
+            $kmlUp = $fileBrowser->GetUpFiles($tid,".kml");
+            $kmlDown = $fileBrowser->GetDownFiles($tid,".kml");
             
             if (!$images) {$nImages = 0;}
             
@@ -165,7 +169,7 @@
             
             $time2 = sprintf("%.0fh %2.0fm %2.0fs", $h, $m, $s);
             
-            echo "<div class='feedbox_div' onclick='ShowTourDetails(\"$tid\", \"$mergedFile\", \"tour_details.php?tid=$tid\", \"/tours/$tid/\")'>\n";
+            echo "<div class='feedbox_div' style='width: ".$width."' onclick='ShowTourDetails(\"$tid\", \"$mergedFile\", \"tour_details.php?tid=$tid\", \"/tours/$tid/\")'>\n";
             echo "<p style='margin-top: 2px; margin-bottom: 5px; margin-right: 10px; margin-left: 10px;'>\n";
             echo "<font class='CommentHeaderFont'>".$name." am ".$day.", ".$date2."</font>\n";
             echo "</p>\n";
@@ -209,7 +213,7 @@
             echo "</p>\n";
             echo "</td>\n";
             echo "<td align='center' valign='middle'>\n";
-            $this->PrintMapForCoordinates($lon,$lat);
+            $this->PrintMapForCoordinates($country,$province,$lon,$lat);
             echo "</td>\n";
             echo "</tr>\n";
             echo "</table>\n";
@@ -242,6 +246,58 @@
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>\n";
         }
         
+        function PrintTimelineBox($tid,$width) {
+            $db = new XTDatabase();
+            $db->Connect();
+            
+            $sumInfo = $db->GetTourSumInfo($tid);
+            $info = $db->GetTourInfo($tid);
+            
+            $nSections = sizeof($info);
+            if ($nSections > 6) {$nSections = 6; $cont = 1;}
+            
+            $sectionWidth = floor(($width-20-($nSections+1)*60)/$nSections);
+            
+            echo "<div class='box_div' style='width: ".($width-20)."'>\n";
+            //echo "<div class='timeline_div'>\n";
+            echo "<table width='".($width-20)."' border='0' cellpadding='0' cellspacing='0'>\n";
+            echo "<tr>\n";
+            echo "<td align='center' valign='middle' width='60'>\n";
+            echo "<img class='timeline_img' src='http://www.xtour.ch/images/Timeline_summary.png' width='50px' onmouseover='HighlightTimelineItem(this)'>\n";
+            echo "</td>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                if ($currentTour["type"] == 1) {$img = 'http://www.xtour.ch/images/Timeline_up.png';}
+                elseif($currentTour["type"] == 2) {$img = 'http://www.xtour.ch/images/Timeline_down.png';}
+                else {$img = 'http://www.xtour.ch/images/Timeline_summary.png';}
+                
+                echo "<td class='timeline_div' align='center' valign='middle' width='".$sectionWidth."'></td>\n";
+                echo "<td align='center' valign='middle' width='60'>\n";
+                echo "<img class='timeline_img' src=".$img." width='50px' onmouseover='HighlightTimelineItem(this)'>\n";
+                echo "</td>\n";
+            }
+            echo "<td></td>\n";
+            echo "</tr>\n";
+            echo "<tr>\n";
+            echo "<td align='center' valign='middle' width='60'>\n";
+            echo $sumInfo["time"];
+            echo "</td>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<td align='center' valign='middle' width='".$sectionWidth."'></td>\n";
+                echo "<td align='center' valign='middle' width='60'>\n";
+                echo $currentTour["time"];
+                echo "</td>\n";
+            }
+            echo "<td></td>\n";
+            echo "</tr>\n";
+            echo "</table>\n";
+            //echo "</div>\n";
+            echo "</div>\n";
+        }
+        
         function PrintBoxWithContent($content, $width) {
             echo "<table width='".$width."' align='left' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
@@ -262,6 +318,12 @@
             echo "<td class='TableItemBottomRight' width='10' height='10'></td>\n";
             echo "</tr>\n";
             echo "</table>\n";
+        }
+        
+        function PrintBoxWithContent2($content, $width) {
+            echo "<div class='box_div' style='width: ".($width-20)."'>\n";
+            echo $content;
+            echo "</div>\n";
         }
         
         function PrintComment($width, $img, $name, $date, $comment) {
@@ -369,23 +431,14 @@
             echo "</table>\n";
         }
         
-        function PrintMapForCoordinates($lon, $lat) {
-            $x1_px = 0;
-            $x2_px = 150;
-            $y1_px = 0;
-            $y2_px = 96;
-            $x1_map = 5.96398;
-            $x2_map = 10.492922;
-            $y1_map = 47.8084;
-            $y2_map = 45.818103;
-            $px_a = ($x1_px - $x2_px) / ($x1_map - $x2_map);
-            $px_b = $x1_px - $px_a * $x1_map;
-            $py_a = ($y1_px - $y2_px) / ($y1_map - $y2_map);
-            $py_b = $y1_px - $py_a * $y1_map;
-            $px = round($px_a * $lon + $px_b);
-            $py = round($py_a * $lat + $py_b);
+        function PrintMapForCoordinates($country, $province, $lon, $lat) {
+            $util = new XTUtilities();
+            $mapName = $util->GetMapNameForCountry($country, $province);
+            $pixelCoordinates = $util->GetMapPixelCoordinates($country, $province, $lon, $lat);
+            $px = $pixelCoordinates[0];
+            $py = $pixelCoordinates[1];
             
-            echo "<div class='map_div'>\n";
+            echo "<div class='map_div' style='background-image: url(\"images/".$mapName."\")'>\n";
             echo "<div style='position: absolute; margin-top: ".($py-2)."px; margin-left: ".($px-2)."px;'><img src='images/dot2.png' width='4px'></div>\n";
             echo "</div>\n";
         }

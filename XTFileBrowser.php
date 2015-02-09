@@ -1,6 +1,7 @@
 <?php
 
     include_once("XTUtilities.php");
+    include_once("XTGPXParser.php");
     
     class XTFileBrowser {
         var $nImages;
@@ -29,36 +30,74 @@
             return $this->nImages;
         }
         
-        function GetUpFiles($tid) {
+        function GetUpFiles($tid,$ext) {
             $util = new XTUtilities();
             $path = $util->GetTourPath($tid);
+            
+            $parser = new XTGPXParser();
             
             $files = array();
             if ($handle = opendir($path)) {
                 while (false !== ($file = readdir($handle))) {
-                    if (strpos($file, "_up")) {array_push($files,$path.$file);}
+                    if (fnmatch("*_up*.gpx",$file)) {array_push($files,$path.$file);}
                 }
             }
             else {return false;}
             
             closedir($handle);
+            
+            if ($ext == ".kml") {
+                $filesKML = array();
+                for ($i = 0; $i < sizeof($files); $i++) {
+                    $file = $files[$i];
+                    $fileKML = str_replace(".gpx",".kml",$file);
+                    
+                    if (!file_exists($fileKML)) {
+                        if (!$parser->OpenFile($file)) {echo "Failed opening file ".$file; return false;}
+                        if (!$parser->ConvertToKML()) {echo "Failed to convert file ".$file; return false;}
+                    }
+                    
+                    array_push($filesKML,$fileKML);
+                }
+                
+                $files = $filesKML;
+            }
             
             return $files;
         }
         
-        function GetDownFiles($tid) {
+        function GetDownFiles($tid,$ext) {
             $util = new XTUtilities();
             $path = $util->GetTourPath($tid);
+            
+            $parser = new XTGPXParser();
             
             $files = array();
             if ($handle = opendir($path)) {
                 while (false !== ($file = readdir($handle))) {
-                    if (strpos($file, "_down")) {array_push($files,$path.$file);}
+                    if (fnmatch("*_down*.gpx",$file)) {array_push($files,$path.$file);}
                 }
             }
             else {return false;}
             
             closedir($handle);
+            
+            if ($ext == ".kml") {
+                $filesKML = array();
+                for ($i = 0; $i < sizeof($files); $i++) {
+                    $file = $files[$i];
+                    $fileKML = str_replace(".gpx",".kml",$file);
+                    
+                    if (!file_exists($fileKML)) {
+                        if (!$parser->OpenFile($file)) {echo "Failed opening file ".$file; return false;}
+                        if (!$parser->ConvertToKML()) {echo "Failed to convert file ".$file; return false;}
+                    }
+                    
+                    array_push($filesKML,$fileKML);
+                }
+                
+                $files = $filesKML;
+            }
             
             return $files;
         }

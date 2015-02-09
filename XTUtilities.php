@@ -2,6 +2,13 @@
 
     class XTUtilities {
         
+        var $countryList = array(
+                             "switzerland" => "map_ch2.png",
+                             "usa_california" => "map_us_ca.png");
+        var $countryRefCoordinates = array(
+                                       "switzerland" => array(5.96398, 10.492922, 47.8084, 45.818103),
+                                       "usa_california" => array(-128.56, -109.93, 42.0, 32.54));
+        
         function GetUserIDFromTour($tid) {
             return substr($tid, -4);
         }
@@ -10,6 +17,41 @@
             $uid = $this->GetUserIDFromTour($tid);
             
             return "users/".$uid."/tours/".$tid."/";
+        }
+        
+        function GetMapNameForCountry($country, $province) {
+            if (!$province) {$name = $country;}
+            else {$name = $country."_".$province;}
+            
+            return $this->countryList[$name];
+        }
+        
+        function GetRefCoordinatesForCountry($country, $province) {
+            if (!$province) {$name = $country;}
+            else {$name = $country."_".$province;}
+            
+            return $this->countryRefCoordinates[$name];
+        }
+        
+        function GetMapPixelCoordinates($country, $province, $lon, $lat) {
+            $refCoordinates = $this->GetRefCoordinatesForCountry($country, $province);
+            
+            $x1_px = 0;
+            $x2_px = 150;
+            $y1_px = 0;
+            $y2_px = 96;
+            $x1_map = $refCoordinates[0];
+            $x2_map = $refCoordinates[1];
+            $y1_map = $refCoordinates[2];
+            $y2_map = $refCoordinates[3];
+            $px_a = ($x1_px - $x2_px) / ($x1_map - $x2_map);
+            $px_b = $x1_px - $px_a * $x1_map;
+            $py_a = ($y1_px - $y2_px) / ($y1_map - $y2_map);
+            $py_b = $y1_px - $py_a * $y1_map;
+            $px = round($px_a * $lon + $px_b);
+            $py = round($py_a * $lat + $py_b);
+            
+            return array($px, $py);
         }
     }
     

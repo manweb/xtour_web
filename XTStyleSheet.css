@@ -67,6 +67,30 @@ html, body {
     -o-transition: margin-left 0s ease; /* Opera */
 }
 
+.box_div {
+    position: relative;
+    border: 1px solid;
+    border-radius: 5px;
+    border-color: #dbdbdb;
+    background-color: #FFFFFF;
+    width: 500px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.timeline_div {
+    height: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
+    background-image: url('http://www.xtour.ch/images/Timeline_line.png');
+    background-repeat: repeat-x;
+    background-size: 50px 50px;
+    background-position-y: center;
+}
+
 .comment_container_div {
     position: absolute;
     display: table;

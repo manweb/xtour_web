@@ -88,6 +88,8 @@
                 
                 array_push($this->TrackPointArray, $arrTMP);
             }
+            
+            return 1;
         }
         
         function GetTrackPointArray() {
@@ -164,9 +166,14 @@
         function ConvertToKML() {
             if (!$this->parser) {return 0;}
             
+            if (fnmatch("*_up*.gpx",$this->fname)) {$color = "#red";}
+            else {$color = "#blue";}
+            
             $this->CreateNewKML();
-            $this->AddTrack("#red","Tour vom 21.03.2013","Albristhorn");
+            $this->AddTrack($color,"Tour vom ".$this->start_time,"");
             $this->FinishKMLAndSave(str_replace(".gpx",".kml",$this->fname));
+            
+            return 1;
         }
         
         function MergeAndConvertToKML($tid) {
@@ -197,7 +204,7 @@
             
             $this->FinishKMLAndSave($filename);
             
-            return 1;
+            return $filename;
         }
         
         function CreateNewKML() {

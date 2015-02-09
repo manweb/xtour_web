@@ -136,6 +136,8 @@
                 $arrTMP["total_time"] = $row['total_time'];
                 $arrTMP["total_distance"] = $row['total_distance'];
                 $arrTMP["total_altitude"] = $row['total_altitude'];
+                $arrTMP["country"] = $row['country'];
+                $arrTMP["province"] = $row['province'];
                 
                 array_push($this->TourArray, $arrTMP);
             }
@@ -186,6 +188,53 @@
             $this->CommentID++;
             
             return $arr;
+        }
+        
+        function GetTourSumInfo($tid) {
+            $query = "select * from tours where tour_id='$tid' and tour_type='0'";
+            
+            $result = mysql_query($query);
+            if (!$result) {return 0;}
+            
+            $row = mysql_fetch_assoc($result);
+            
+            $info = array("date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "country" => $row['country']);
+            
+            return $info;
+        }
+        
+        function GetNumUp($tid) {
+            $query = "select * from tours where tour_id='$tid' and tour_type='1'";
+            
+            $result = mysql_query($query);
+            if (!$result) {return -1;}
+            
+            return mysql_num_rows($result);
+        }
+        
+        function GetNumDown($tid) {
+            $query = "select * from tours where tour_id='$tid' and tour_type='2'";
+            
+            $result = mysql_query($query);
+            if (!$result) {return -1;}
+            
+            return mysql_num_rows($result);
+        }
+        
+        function GetTourInfo($tid) {
+            $query = "select * from tours where tour_id='$tid' and (tour_type='1' or tour_type='2') order by date asc";
+            
+            $result = mysql_query($query);
+            if (!$result) {return 0;}
+            
+            $info = array();
+            while ($row = mysql_fetch_assoc($result)) {
+                $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "country" => $row['country']);
+                
+                array_push($info, $arrTMP);
+            }
+            
+            return $info;
         }
     }
 ?>

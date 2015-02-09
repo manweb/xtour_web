@@ -1,3 +1,6 @@
+var kmlLayers = [];
+var map;
+
 function initialize(filename) {
     document.getElementById("map-canvas").innerHTML = "";
     
@@ -5,10 +8,10 @@ function initialize(filename) {
     var mapOptions = {
     center: new google.maps.LatLng(46.770809, 8.377733), zoom: 7
     };
-    var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+    map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     
-    var ctaLayer = new google.maps.KmlLayer(fname);
-    ctaLayer.setMap(map);
+    kmlLayers[0] = new google.maps.KmlLayer(fname);
+    kmlLayers[0].setMap(map);
     
     var myLatlng = new google.maps.LatLng(46.770809,8.377733);
     var marker = new google.maps.Marker({position: myLatlng, map: map, title:"Picture info here"});
@@ -147,7 +150,7 @@ function ValidateLogin() {
 }
 
 function LoadMainDiv(content, tid, file) {
-    document.getElementById('MainContent').innerHTML = "<p align='left' style='padding-left:210px; padding-top:50px'><img src='images/loading.gif' width='80'></p>";
+    document.getElementById('MainContent').innerHTML = "<p align='left' style='padding-left:210px; padding-top:50px'><img src='http://www.xtour.ch/images/loading.gif' width='80'></p>";
     
     if (window.XMLHttpRequest)
     {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -263,4 +266,18 @@ function MoveMovingDiv()
 function HideMovingDiv()
 {
     document.getElementById('div_moving').style.visibility = 'hidden';
+}
+
+function HighlightTimelineItem(element)
+{
+    var allElements = document.querySelectorAll(".timeline_img");
+    
+    for (var i = 0; i < allElements.length; i++) {
+        allElements[i].style.border = "none";
+        allElements[i].style.width = "50px";
+        allElements[i].style.height = "50px";
+    }
+    
+    element.style.width = "54px";
+    element.style.height = "54px";
 }
