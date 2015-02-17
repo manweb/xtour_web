@@ -91,6 +91,29 @@ html, body {
     background-position-y: center;
 }
 
+.timeline_value_div {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+.timeline_value_div_box {
+    position: relative;
+}
+
+.timeline_img {
+    transition: width .5s ease;
+    -moz-transition: width .5s ease;
+    -webkit-transition: width .5s ease;
+    -o-transition: width .5s ease;
+}
+
+.timeline_table {
+    text-align: left;
+    vertical-align: middle;
+    padding-bottom: 5px;
+}
+
 .comment_container_div {
     position: absolute;
     display: table;
@@ -411,6 +434,14 @@ html, body {
     font-size: 14;
     font-weight: 100;
     color: #ffffff;
+}
+
+.TourDetailFont
+{
+    font-family: helvetica, sans-serif;
+    font-size: 20;
+    font-weight: bold;
+    color: #C9C9C9;
 }
 
 .CommentHeaderFont

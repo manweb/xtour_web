@@ -268,16 +268,34 @@ function HideMovingDiv()
     document.getElementById('div_moving').style.visibility = 'hidden';
 }
 
-function HighlightTimelineItem(element)
+function HighlightTimelineItem(element,oldSize,newSize)
 {
+    if (element.clientWidth == newSize) {return;}
+    
     var allElements = document.querySelectorAll(".timeline_img");
     
     for (var i = 0; i < allElements.length; i++) {
         allElements[i].style.border = "none";
-        allElements[i].style.width = "50px";
-        allElements[i].style.height = "50px";
+        allElements[i].style.width = oldSize+"px";
+        allElements[i].style.height = oldSize+"px";
     }
     
-    element.style.width = "54px";
-    element.style.height = "54px";
+    element.style.width = newSize+"px";
+    element.style.height = newSize+"px";
+    
+    var valueElements = document.querySelectorAll(".timeline_value_div");
+    
+    for (var i = 0; i < valueElements.length; i++) {
+        var e = "#"+valueElements[i].id;
+        $(e).fadeOut(600);
+        //valueElements[i].style.visibility= "hidden";
+    }
+    
+    for (var i = 0; i < 6; i++) {
+        var elementID = "timeline_value_div" + i + element.id;
+        var e = "#"+elementID;
+        $(e).fadeIn(600);
+        var currentElement = document.getElementById(elementID);
+        //currentElement.style.visibility = "visible";
+    }
 }

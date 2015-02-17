@@ -53,6 +53,22 @@
             
             return array($px, $py);
         }
+        
+        function GetFormattedTimeFromSeconds($seconds) {
+            $hour = floor($seconds/3600);
+            $minutes = floor(($seconds/3600 - $hour)*60);
+            $seconds = floor((($seconds/3600 - $hour)*60 - $minutes)*60);
+            
+            if ($hour == 0) {$hourString = "";}
+            else {$hourString = $hour."h";}
+            
+            if ($minutes == 0) {$minutesString = "";}
+            else {$minutesString = $minutes."m";}
+            
+            $secondsString = $seconds."s";
+            
+            return $hourString." ".$minutesString." ".$secondsString;
+        }
     }
     
 ?>

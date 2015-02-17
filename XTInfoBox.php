@@ -247,8 +247,16 @@
         }
         
         function PrintTimelineBox($tid,$width) {
+            $iconSize = 30;
+            $iconSizeHighlight = 45;
+            $boxSize = 45;
+            $iconBoxSize = ($width-20-3*iconSize)/3;
+            $iconBoxSize2 = ($width-20-3*$iconBoxSize)/2;
+            
             $db = new XTDatabase();
             $db->Connect();
+            
+            $utilities = new XTUtilities();
             
             $sumInfo = $db->GetTourSumInfo($tid);
             $info = $db->GetTourInfo($tid);
@@ -256,14 +264,14 @@
             $nSections = sizeof($info);
             if ($nSections > 6) {$nSections = 6; $cont = 1;}
             
-            $sectionWidth = floor(($width-20-($nSections+1)*60)/$nSections);
+            $sectionWidth = floor(($width-20-($nSections+1)*$boxSize)/$nSections);
             
             echo "<div class='box_div' style='width: ".($width-20)."'>\n";
             //echo "<div class='timeline_div'>\n";
             echo "<table width='".($width-20)."' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
-            echo "<td align='center' valign='middle' width='60'>\n";
-            echo "<img class='timeline_img' src='http://www.xtour.ch/images/Timeline_summary.png' width='50px' onmouseover='HighlightTimelineItem(this)'>\n";
+            echo "<td align='center' valign='middle' width='".$boxSize."'>\n";
+            echo "<img class='timeline_img' id='0' src='http://www.xtour.ch/images/Timeline_summary.png' width='".$iconSizeHighlight."px' onmouseover='HighlightTimelineItem(this,".$iconSize.",".$iconSizeHighlight.")'>\n";
             echo "</td>\n";
             for ($i = 0; $i < $nSections; $i++) {
                 $currentTour = $info[$i];
@@ -273,27 +281,121 @@
                 else {$img = 'http://www.xtour.ch/images/Timeline_summary.png';}
                 
                 echo "<td class='timeline_div' align='center' valign='middle' width='".$sectionWidth."'></td>\n";
-                echo "<td align='center' valign='middle' width='60'>\n";
-                echo "<img class='timeline_img' src=".$img." width='50px' onmouseover='HighlightTimelineItem(this)'>\n";
-                echo "</td>\n";
-            }
-            echo "<td></td>\n";
-            echo "</tr>\n";
-            echo "<tr>\n";
-            echo "<td align='center' valign='middle' width='60'>\n";
-            echo $sumInfo["time"];
-            echo "</td>\n";
-            for ($i = 0; $i < $nSections; $i++) {
-                $currentTour = $info[$i];
-                
-                echo "<td align='center' valign='middle' width='".$sectionWidth."'></td>\n";
-                echo "<td align='center' valign='middle' width='60'>\n";
-                echo $currentTour["time"];
+                echo "<td align='center' valign='middle' width='".$boxSize."'>\n";
+                echo "<img class='timeline_img' id='".($i+1)."' src=".$img." width='".$iconSize."px' onmouseover='HighlightTimelineItem(this,".$iconSize.",".$iconSizeHighlight.")'>\n";
                 echo "</td>\n";
             }
             echo "<td></td>\n";
             echo "</tr>\n";
             echo "</table>\n";
+            
+            echo "<table width='".($width-20)."' border='0' cellpadding='0' cellspacing='0'>\n";
+            echo "<tr>\n";
+            echo "<td class='timeline_table' width='".$iconSize."'>\n";
+            echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_div' id='timeline_value_div00' style='visibility: visible'>\n";
+            echo "<font class='TourDetailFont'>".$utilities->GetFormattedTimeFromSeconds($sumInfo["time"])."</font>\n";
+            echo "</div>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<div class='timeline_value_div' id='timeline_value_div0".($i+1)."'>\n";
+                echo "<font class='TourDetailFont'>".$utilities->GetFormattedTimeFromSeconds($currentTour["time"])."</font>\n";
+                echo "</div>\n";
+            }
+            echo "</div>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconSize."'>\n";
+            echo "<img src='http://www.xtour.ch/images/altitude_icon.png' width='".$iconSize."'>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_div' id='timeline_value_div10' style='visibility: visible'>\n";
+            echo "<font class='TourDetailFont'>".$sumInfo["ascent"]." m</font>\n";
+            echo "</div>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<div class='timeline_value_div' id='timeline_value_div1".($i+1)."'>\n";
+                echo "<font class='TourDetailFont'>".$currentTour["ascent"]." m</font>\n";
+                echo "</div>\n";
+            }
+            echo "</div>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconSize."'>\n";
+            echo "<img src='http://www.xtour.ch/images/skier_up_icon.png' width='".$iconSize."'>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_div' id='timeline_value_div20' style='visibility: visible'>\n";
+            echo "<font class='TourDetailFont'>".$sumInfo["distance"]." km</font>\n";
+            echo "</div>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<div class='timeline_value_div' id='timeline_value_div2".($i+1)."'>\n";
+                echo "<font class='TourDetailFont'>".$currentTour["distance"]." km</font>\n";
+                echo "</div>\n";
+            }
+            echo "</div>\n";
+            echo "</td>\n";
+            echo "</tr>\n";
+            echo "<td class='timeline_table' width='".$iconSize."'>\n";
+            echo "<img src='http://www.xtour.ch/images/skier_down_icon.png' width='".$iconSize."'>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_div' id='timeline_value_div30' style='visibility: visible'>\n";
+            echo "<font class='TourDetailFont'>".$sumInfo["time"]."</font>\n";
+            echo "</div>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<div class='timeline_value_div' id='timeline_value_div3".($i+1)."'>\n";
+                echo "<font class='TourDetailFont'>".$currentTour["time"]."</font>\n";
+                echo "</div>\n";
+            }
+            echo "</div>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconSize."'>\n";
+            echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_div' id='timeline_value_div40' style='visibility: visible'>\n";
+            echo "<font class='TourDetailFont'>".$sumInfo["time"]."</font>\n";
+            echo "</div>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<div class='timeline_value_div' id='timeline_value_div4".($i+1)."'>\n";
+                echo "<font class='TourDetailFont'>".$currentTour["time"]."</font>\n";
+                echo "</div>\n";
+            }
+            echo "</div>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconSize."'>\n";
+            echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+            echo "</td>\n";
+            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_div' id='timeline_value_div50' style='visibility: visible'>\n";
+            echo "<font class='TourDetailFont'>".$sumInfo["time"]."</font>\n";
+            echo "</div>\n";
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                
+                echo "<div class='timeline_value_div' id='timeline_value_div5".($i+1)."'>\n";
+                echo "<font class='TourDetailFont'>".$currentTour["time"]."</font>\n";
+                echo "</div>\n";
+            }
+            echo "</div>\n";
+            echo "</td>\n";
+            echo "</table>\n";
+            
             //echo "</div>\n";
             echo "</div>\n";
         }
