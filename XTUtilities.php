@@ -1,22 +1,41 @@
 <?php
 
+    include_once("XTDatabase.php");
+    
     class XTUtilities {
         
         var $countryList = array(
                              "switzerland" => "map_ch2.png",
-                             "usa_california" => "map_us_ca.png");
+                             "usa_california" => "map_us_ca.png",
+                             "usa_colorado" => "map_us_co.png");
         var $countryRefCoordinates = array(
                                        "switzerland" => array(5.96398, 10.492922, 47.8084, 45.818103),
-                                       "usa_california" => array(-128.56, -109.93, 42.0, 32.54));
+                                       "usa_california" => array(-128.56, -109.93, 42.0, 32.54),
+                                       "usa_colorado" => array(-109.540666667,-101.540666667,41,36.994));
         
         function GetUserIDFromTour($tid) {
             return substr($tid, -4);
+        }
+        
+        function GetFullUsernameFromTour($tid) {
+            $id = $this->GetUserIDFromTour($tid);
+            
+            $db = new XTDatabase();
+            $db->Connect();
+            
+            return $db->GetUserNameForID($id);
         }
         
         function GetTourPath($tid) {
             $uid = $this->GetUserIDFromTour($tid);
             
             return "users/".$uid."/tours/".$tid."/";
+        }
+        
+        function GetUserIconForTour($tid) {
+            $uid = $this->GetUserIDFromTour($tid);
+            
+            return "users/".$uid."/profile.png";
         }
         
         function GetMapNameForCountry($country, $province) {
@@ -68,6 +87,25 @@
             $secondsString = $seconds."s";
             
             return $hourString." ".$minutesString." ".$secondsString;
+        }
+        
+        function DeleteDirectoryForTour($tid) {
+            $path = $this->GetTourPath($tid);
+            
+            $return = 1;
+            if (is_dir($path)) {
+                $files = scandir($path);
+                foreach ($files as $file) {
+                    if ($file != "." && $file != "..") {
+                        if (!unlink($path."/".$file)) {$return = 0;}
+                    }
+                }
+                
+                reset($files);
+                rmdir($path);
+            }
+            
+            return $return;
         }
     }
     

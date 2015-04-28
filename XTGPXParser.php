@@ -13,11 +13,18 @@
         var $minLon;
         var $maxLat;
         var $maxLon;
+        var $minAlt;
+        var $maxAlt;
         var $start_time;
         var $end_time;
         var $total_time;
         var $total_distance;
         var $total_altitude;
+        var $total_descent;
+        var $lowestPoint;
+        var $highestPoint;
+        var $country;
+        var $province;
         var $KML_doc;
         var $KML_document;
         var $KML_folder;
@@ -44,6 +51,11 @@
                 $this->total_time = (int)$metadata_elements->TotalTime;
                 $this->total_distance = (double)$metadata_elements->TotalDistance;
                 $this->total_altitude = (double)$metadata_elements->TotalAltitude;
+                $this->total_descent = (double)$metadata_elements->TotalDescent;
+                $this->lowestPoint = (double)$metadata_elements->LowestPoint;
+                $this->highestPoint = (double)$metadata_elements->HighestPoint;
+                $this->country = (string)$metadata_elements->Country;
+                $this->province = (string)$metadate_elements->Province;
             }
             
             // Get the track
@@ -62,8 +74,10 @@
             $this->TrackPointArray = array();
             $this->minLat = 1e6;
             $this->minLon = 1e6;
+            $this->minAlt = 1e6;
             $this->maxLat = -1e6;
             $this->maxLon = -1e6;
+            $this->maxAlt = -1e6;
             foreach ($track_points as $trkpt) {
                 $arrTMP = array();
                 $att = $trkpt->attributes();
@@ -82,6 +96,10 @@
                 $elevation = $track_point_elements->ele;
                 if ($elevation != "") {$arrTMP["elevation"] = (double)$elevation;}
                 else {$arrTMP["elevation"] = -999;}
+                
+                if ((double)$elevation < $this->minAlt) {$this->minAlt = (double)$elevation;}
+                if ((double)$elevation > $this->maxAlt) {$this->maxAlt = (double)$elevation;}
+                
                 $timestamp = $track_point_elements->time;
                 if ($timestamp != "") {$arrTMP["time"] = (string)$timestamp;}
                 else {$arrTMP["time"] = -999;}
@@ -110,6 +128,14 @@
         
         function GetMaxLon() {
             return $this->maxLon;
+        }
+        
+        function GetMinAlt() {
+            return $this->minAlt;
+        }
+        
+        function GetMaxAlt() {
+            return $this->maxAlt;
         }
         
         function GetNumberOfTrackPoints() {
@@ -142,6 +168,26 @@
         
         function GetTotalAltitude() {
             return $this->total_altitude;
+        }
+        
+        function GetTotalDescent() {
+            return $this->total_descent;
+        }
+        
+        function GetLowestPoint() {
+            return $this->lowestPoint;
+        }
+        
+        function GetHighestPoint() {
+            return $this->highestPoint;
+        }
+        
+        function GetCountry() {
+            return $this->country;
+        }
+        
+        function GetProvince() {
+            return $this->province;
         }
         
         function GetFirstCoordinate() {
@@ -321,6 +367,7 @@
             
             $arr['cols'][] = array('label' => 'time', 'type' => 'number');
             $arr['cols'][] = array('label' => 'altitude', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'tooltip', 'type' => 'string', 'p' => array('role' => 'tooltip'));
             
             if (!$this->TrackPointArray) {return 0;}
             
@@ -331,11 +378,37 @@
                 if ($TrackPoint["elevation"] == -999) {continue;}
                 $time = strtotime($TrackPoint["time"]);
                 $diff = $time - $unixStartTime;
+                if ($diff < 0) {continue;}
                 $hours = floor($diff/3600);
                 $minutes = floor(($diff/3600 - $hours)*60);
                 $seconds = (($diff/3600 - $hours)*60 - $minutes)*60;
                 $formattedTime = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-                $arr['rows'][]['c'] = array(array('v' => $diff),array('v' => $TrackPoint["elevation"]));
+                $arr['rows'][]['c'] = array(array('v' => $diff),array('v' => $TrackPoint["elevation"]),array('v' => $TrackPoint["longitude"].";".$TrackPoint["latitude"]));
+            }
+            
+            return json_encode($arr);
+        }
+        
+        function GetAltitudeTableVsDistance() {
+            $arr = array();
+            
+            $arr['cols'][] = array('label' => 'distance', 'type' => 'number');
+            $arr['cols'][] = array('label' => 'altitude', 'type' => 'number');
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $distance = 0;
+            $num = $this->GetNumberOfTrackPoints();
+            for ($i = 0; $i < $num; $i++) {
+                if ($TrackPoint["elevation"] == -999) {continue;}
+                if ($i > 0) {
+                    $lon1 = $this->TrackPointArray[$i-1]["longitude"];
+                    $lat1 = $this->TrackPointArray[$i-1]["latitude"];
+                    $lon2 = $this->TrackPointArray[$i]["longitude"];
+                    $lat2 = $this->TrackPointArray[$i]["latitude"];
+                    $distance += $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
+                }
+                $arr['rows'][]['c'] = array(array('v' => $distance),array('v' => $this->TrackPointArray[$i]["elevation"]));
             }
             
             return json_encode($arr);

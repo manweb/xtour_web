@@ -3,6 +3,11 @@ html, body {
     padding: 0px;
 }
 
+a {
+    color: #000000;
+    text-decoration: none;
+}
+
 .header_link:link {
     color: #ffffff;
     text-decoration: none;
@@ -27,11 +32,69 @@ html, body {
     height: 100px;
     background-image: url('images/header_div_background.png');
     background-repeat: repeat-x;
+    background-position: left bottom;
     border: none;
     width: 100%;
     margin: 0px auto;
     position: fixed;
     z-index: 100;
+    left: 0px;
+}
+
+.header_icon {
+    width: 80px;
+    height: 80px;
+    background-image: url('images/icon.png');
+    background-size: 100%;
+    background-repeat: none;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.header_menu {
+    width: 400px;
+    height: 50px;
+    position: absolute;
+    top: 50px;
+    left: 200px;
+}
+
+.header_search {
+    width: 200px;
+    height: 50px;
+    position: absolute;
+    top: 40px;
+    left: 650px;
+}
+
+.header_login {
+    width: 80px;
+    height: 75px;
+    position: absolute;
+    float: right;
+    top: 25px;
+    right: 10px;
+    text-align: center;
+}
+
+.header_login_icon {
+    width: 40px;
+    height: 40px;
+    background-image: url('images/profile_icon.png');
+    background-size: 100%;
+    background-repeat: none;
+    position: relative;
+    top: 0px;
+    left: 20px;
+}
+
+.header_login_text {
+    width: 80px;
+    height: 20px;
+    position: relative;
+    margin-top: 2px;
+    top: 0px;
     left: 0px;
 }
 
@@ -81,6 +144,13 @@ html, body {
     margin-bottom: 10px;
 }
 
+.tab_div {
+    transition: left .5s ease;
+    -moz-transition: left .5s ease; /* Firefox 4 */
+    -webkit-transition: left .5s ease; /* Safari and Chrome */
+    -o-transition: left .5s ease; /* Opera */
+}
+
 .timeline_div {
     height: 60px;
     margin-left: 10px;
@@ -93,12 +163,20 @@ html, body {
 
 .timeline_value_div {
     position: absolute;
-    left: 0px;
-    top: 0px;
+}
+
+.timeline_value_img_div {
+    position: absolute;
+    left: 2px;
+    top: 1px;
+    width: 30px;
+    vertical-align: middle;
 }
 
 .timeline_value_div_box {
     position: relative;
+    padding: 0px 0px 0px 0px;
+    margin: 0px 0px 0px 0px;
 }
 
 .timeline_img {
@@ -108,17 +186,54 @@ html, body {
     -o-transition: width .5s ease;
 }
 
+.timeline_value_img {
+    vertical-align: middle;
+}
+
 .timeline_table {
     text-align: left;
     vertical-align: middle;
     padding-bottom: 5px;
+    border-left: solid 1px;
+    border-left-color: #C9C9C9;
 }
 
 .comment_container_div {
+    position: relative;
+    margin-top: 15px;
+    margin-left: 40px;
+    margin-right: 25px;
+    border: 1px solid;
+    border-color: #dbdbdb
+}
+
+.comment_img_div {
     position: absolute;
-    display: table;
-    border: 0px none;
-    left: 25px;
+    top: -15px;
+    left: -15px;
+    background-color: #ffffff;
+}
+
+.comment_header_div {
+    position: absolute;
+    top: 2px;
+    left: 17px;
+}
+
+.comment_content_div {
+    position: relative;
+    margin-top: 20px;
+    margin-left: 17px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.comment_content_textfield_div {
+    position: relative;
+    margin-top: 5px;
+    margin-left: 17px;
+    margin-right: 5px;
+    margin-bottom: 5px;
 }
 
 .comment_div {
@@ -441,7 +556,7 @@ html, body {
     font-family: helvetica, sans-serif;
     font-size: 20;
     font-weight: bold;
-    color: #C9C9C9;
+    color: #a4a4a4;
 }
 
 .CommentHeaderFont
@@ -457,6 +572,27 @@ html, body {
     font-family: helvetica, sans-serif;
     font-size: 12;
     font-weight: 100;
+    color: #000000;
+}
+
+.TimeLineFont
+{
+    font-family: helvetica, sans-serif;
+    font-size: 12;
+    color: #000000;
+}
+
+.TimeLineFontDetailHeader
+{
+    font-family: helvetica, sans-serif;
+    font-size: 12;
+    color: #C9C9C9;
+}
+
+.TimeLineFontDetail
+{
+    font-family: helvetica, sans-serif;
+    font-size: 14;
     color: #000000;
 }
 

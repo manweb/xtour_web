@@ -169,10 +169,18 @@
             
             $time2 = sprintf("%.0fh %2.0fm %2.0fs", $h, $m, $s);
             
-            echo "<div class='feedbox_div' style='width: ".$width."' onclick='ShowTourDetails(\"$tid\", \"$mergedFile\", \"tour_details.php?tid=$tid\", \"/tours/$tid/\")'>\n";
-            echo "<p style='margin-top: 2px; margin-bottom: 5px; margin-right: 10px; margin-left: 10px;'>\n";
+            echo "<div class='feedbox_div' id='".$tid."_div_feedbox' style='width: ".$width."' onclick='ShowTourDetails(\"$tid\")'>\n";
+            echo "<table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+            echo "<tr>\n";
+            echo "<td width='80%' align='left' valign='top' style='padding-top: 2px; padding-left: 10px;'>\n";
             echo "<font class='CommentHeaderFont'>".$name." am ".$day.", ".$date2."</font>\n";
-            echo "</p>\n";
+            echo "</td>\n";
+            echo "<td width='20%' align='right' valign='top' style='padding-top: 2px; padding-right: 10px;'>\n";
+            echo "<img id='feedbox_hide' src='http://www.xtour.ch/images/hide_icon.png' width='15' onmouseover='this.src=\"http://www.xtour.ch/images/hide_icon_selected.png\"' onmouseout='this.src=\"http://www.xtour.ch/images/hide_icon.png\"' onclick=''>";
+            echo "<img id='feedbox_close' src='http://www.xtour.ch/images/close_icon.png' width='15' onmouseover='this.src=\"http://www.xtour.ch/images/close_icon_selected.png\"' onmouseout='this.src=\"http://www.xtour.ch/images/close_icon.png\"' onclick='DeleteTour(".$tid.")'>";
+            echo "</td>\n";
+            echo "</tr>\n";
+            echo "</table>\n";
             
             echo "<table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
@@ -218,7 +226,7 @@
             echo "</tr>\n";
             echo "</table>\n";
             
-            echo "<div id='".$tid."_div' style='position: relative;'>\n";
+            echo "<div id='".$tid."_div_comment' style='position: relative;'>\n";
             
             // Print comments for this tour
             $DB = new XTDatabase();
@@ -249,6 +257,77 @@
         function PrintTimelineBox($tid,$width) {
             $iconSize = 30;
             $iconSizeHighlight = 45;
+            $boxSize = ($width-20)/4;
+            $iconBoxSize = ($width-20-3*iconSize)/3;
+            $iconBoxSize2 = ($width-20-3*$iconBoxSize)/2;
+            
+            $db = new XTDatabase();
+            $db->Connect();
+            
+            $utilities = new XTUtilities();
+            
+            $UserIcon = $utilities->GetUserIconForTour($tid);
+            $UserName = $utilities->GetFullUserNameFromTour($tid);
+            
+            $sumInfo = $db->GetTourSumInfo($tid);
+            $info = $db->GetTourInfo($tid);
+            
+            $nSections = sizeof($info);
+            if ($nSections > 6) {$nSections = 6; $cont = 1;}
+            
+            $sectionWidth = floor(($width-20)/$nSections);
+            
+            echo "<div class='box_div' style='width: ".($width-20)."; height: 150px;'>\n";
+            echo "<div style='position: absolute; top: -10px; left: -10px'><img src='http://www.xtour.ch/".$UserIcon."' width='40px'></div>\n";
+            echo "<div style='position: relative; top: 5px; left: 25px; height: 25px'><font class='CommentHeaderFont'>".$UserName." war am ".date("l d.m.Y",$sumInfo["date"])." auf einer Tour in der Region ".$sumInfo["province"]." (".$sumInfo["country"].")</font></div>\n";
+            
+            for ($i = 0; $i < $nSections; $i++) {
+                $currentTour = $info[$i];
+                $offset = $i*$sectionWidth + 10;
+                if ($i == 0) {$title = "&Uuml;bersicht";}
+                if ($currentTour['type'] == 1) {$title = "Aufstieg #".$currentTour['count'];}
+                if ($currentTour['type'] == 2) {$title = "Abfahrt #".$currentTour['count'];}
+                
+                echo "<div style='position:absolute; top: 40px; left: ".$offset."px; padding-left: 5px; padding-top: 5px; width: ".($sectionWidth-5)."px; height: 17px; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #dbdbdb;' onclick='MoveTabDiv(".$i.",".$offset.")'><a href='javascript:void(0)'><font class='TimeLineFont'>".$title."</font></a></div>\n";
+            }
+            
+            echo "<div class='tab_div' id='TabDiv' style='position:absolute; top: 37px; left: 10px; width: ".$sectionWidth."px; height: 22px; border-top-style: solid; border-left-style: solid; border-right-style: solid; border-bottom-style: solid; border-top-width: 3px; border-left-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-top-color: #468ec8; border-left-color: #dbdbdb; border-right-color: #dbdbdb; border-bottom-color: #ffffff;'></div>\n";
+            
+            $sections = array("Dauer","Distanz","Geschwindigkeit","Höhendifferenz","Tiefster Punkt","Höchster Punkt","Aufstiegsrate","Abfahrtsrate");
+            $UnitsArray = array(0,"m","m/h","m","m","m","m/h","m/h");
+            
+            echo "<div style='position:absolute; top: 80px; left: 10px; width: 480px'>\n";
+            echo "<table width='100%' border='0' cellpadding='0' cellspacing='0'>\n";
+            for ($i = 0; $i < 2; $i++) {
+                echo "<tr>\n";
+                for ($k = 0; $k < 4; $k++) {
+                    echo "<td align='left' valign='top' width='25%' height='35px'>\n";
+                    echo "<font class='TimeLineFontDetailHeader'>".$sections[$i*4+$k]."</font><br>\n";
+                    echo "<div class='timeline_value_div_box'>\n";
+                    for ($n = 0; $n < $nSections; $n++) {
+                        echo "<div class='timeline_value_div' id='timeline_value_div".($i*4+$k).$n."' style='visibility: visible'>";
+                        echo "<font class='TimeLineFontDetail'>\n";
+                        $unit = $UnitsArray[$i*4+$k];
+                        if ($i == 0 && $k == 0) {echo $utilities->GetFormattedTimeFromSeconds($info[$n]["time"]);}
+                        if ($i == 0 && $k == 1) {echo $info[$n]["distance"]*1000.0." ".$unit;}
+                        if ($i == 0 && $k == 2) {echo round($info[$n]["distance"]/$info[$n]["time"]*3600000.0)." ".$unit;}
+                        if ($i == 0 && $k == 3) {echo $info[$n]["ascent"]." ".$unit;}
+                        echo "</font>\n";
+                        echo "</div>\n";
+                    }
+                    echo "</div>\n";
+                    echo "</td>\n";
+                }
+                echo "</tr>\n";
+            }
+            echo "</table>\n";
+            echo "</div>\n";
+            echo "</div>\n";
+        }
+        
+        function PrintTimelineBox2($tid,$width) {
+            $iconSize = 30;
+            $iconSizeHighlight = 45;
             $boxSize = 45;
             $iconBoxSize = ($width-20-3*iconSize)/3;
             $iconBoxSize2 = ($width-20-3*$iconBoxSize)/2;
@@ -257,6 +336,9 @@
             $db->Connect();
             
             $utilities = new XTUtilities();
+            
+            $UserIcon = $utilities->GetUserIconForTour($tid);
+            $UserName = $utilities->GetFullUserNameFromTour($tid);
             
             $sumInfo = $db->GetTourSumInfo($tid);
             $info = $db->GetTourInfo($tid);
@@ -267,6 +349,8 @@
             $sectionWidth = floor(($width-20-($nSections+1)*$boxSize)/$nSections);
             
             echo "<div class='box_div' style='width: ".($width-20)."'>\n";
+            echo "<div style='position: absolute; top: -10px; left: -10px'><img src='http://www.xtour.ch/".$UserIcon."' width='40px'></div>\n";
+            echo "<div style='position: relative; top: 5px; left: 25px; height: 25px'><font class='CommentHeaderFont'>".$UserName." war am ".date("l d.m.Y",$sumInfo["date"])." auf einer Tour in der Region ".$sumInfo["province"]." (".$sumInfo["country"].")</font></div>\n";
             //echo "<div class='timeline_div'>\n";
             echo "<table width='".($width-20)."' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
@@ -289,13 +373,16 @@
             echo "</tr>\n";
             echo "</table>\n";
             
-            echo "<table width='".($width-20)."' border='0' cellpadding='0' cellspacing='0'>\n";
-            echo "<tr>\n";
-            echo "<td class='timeline_table' width='".$iconSize."'>\n";
-            echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            /*echo "<table width='".($width-20)."' border='0' cellpadding='0' cellspacing='0'>\n";
+             echo "<tr>\n";
+             echo "<td class='timeline_table' width='".$iconSize."'>\n";
+             echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+             echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";*/
             echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_img_div'>\n";
+            echo "<img class='timeline_value_img' src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+            echo "</div>\n";
             echo "<div class='timeline_value_div' id='timeline_value_div00' style='visibility: visible'>\n";
             echo "<font class='TourDetailFont'>".$utilities->GetFormattedTimeFromSeconds($sumInfo["time"])."</font>\n";
             echo "</div>\n";
@@ -307,12 +394,15 @@
                 echo "</div>\n";
             }
             echo "</div>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconSize."'>\n";
-            echo "<img src='http://www.xtour.ch/images/altitude_icon.png' width='".$iconSize."'>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            /*echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconSize."'>\n";
+             echo "<img src='http://www.xtour.ch/images/altitude_icon.png' width='".$iconSize."'>\n";
+             echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";*/
             echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_img_div'>\n";
+            echo "<img class='timeline_value_img' src='http://www.xtour.ch/images/altitude_icon.png' width='".$iconSize."'>\n";
+            echo "</div>\n";
             echo "<div class='timeline_value_div' id='timeline_value_div10' style='visibility: visible'>\n";
             echo "<font class='TourDetailFont'>".$sumInfo["ascent"]." m</font>\n";
             echo "</div>\n";
@@ -324,12 +414,15 @@
                 echo "</div>\n";
             }
             echo "</div>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconSize."'>\n";
-            echo "<img src='http://www.xtour.ch/images/skier_up_icon.png' width='".$iconSize."'>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            /*echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconSize."'>\n";
+             echo "<img src='http://www.xtour.ch/images/skier_up_icon.png' width='".$iconSize."'>\n";
+             echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";*/
             echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_img_div'>\n";
+            echo "<img class='timeline_value_img' src='http://www.xtour.ch/images/skier_up_icon.png' width='".$iconSize."'>\n";
+            echo "</div>\n";
             echo "<div class='timeline_value_div' id='timeline_value_div20' style='visibility: visible'>\n";
             echo "<font class='TourDetailFont'>".$sumInfo["distance"]." km</font>\n";
             echo "</div>\n";
@@ -341,30 +434,36 @@
                 echo "</div>\n";
             }
             echo "</div>\n";
-            echo "</td>\n";
-            echo "</tr>\n";
-            echo "<td class='timeline_table' width='".$iconSize."'>\n";
-            echo "<img src='http://www.xtour.ch/images/skier_down_icon.png' width='".$iconSize."'>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            /*echo "</td>\n";
+             echo "</tr>\n";
+             echo "<td class='timeline_table' width='".$iconSize."'>\n";
+             echo "<img src='http://www.xtour.ch/images/skier_down_icon.png' width='".$iconSize."'>\n";
+             echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";*/
             echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_img_div'>\n";
+            echo "<img class='timeline_value_img' src='http://www.xtour.ch/images/skier_down_icon.png' width='".$iconSize."'>\n";
+            echo "</div>\n";
             echo "<div class='timeline_value_div' id='timeline_value_div30' style='visibility: visible'>\n";
-            echo "<font class='TourDetailFont'>".$sumInfo["time"]."</font>\n";
+            echo "<font class='TourDetailFont'>".$sumInfo["descent"]."</font>\n";
             echo "</div>\n";
             for ($i = 0; $i < $nSections; $i++) {
                 $currentTour = $info[$i];
                 
                 echo "<div class='timeline_value_div' id='timeline_value_div3".($i+1)."'>\n";
-                echo "<font class='TourDetailFont'>".$currentTour["time"]."</font>\n";
+                echo "<font class='TourDetailFont'>".$currentTour["descent"]."</font>\n";
                 echo "</div>\n";
             }
             echo "</div>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconSize."'>\n";
-            echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            /*echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconSize."'>\n";
+             echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+             echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";*/
             echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_img_div'>\n";
+            echo "<img class='timeline_value_img' src='http://www.xtour.ch/images/altitude_high_icon.png' width='".$iconSize."'>\n";
+            echo "</div>\n";
             echo "<div class='timeline_value_div' id='timeline_value_div40' style='visibility: visible'>\n";
             echo "<font class='TourDetailFont'>".$sumInfo["time"]."</font>\n";
             echo "</div>\n";
@@ -376,12 +475,15 @@
                 echo "</div>\n";
             }
             echo "</div>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconSize."'>\n";
-            echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
-            echo "</td>\n";
-            echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";
+            /*echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconSize."'>\n";
+             echo "<img src='http://www.xtour.ch/images/clock_icon.png' width='".$iconSize."'>\n";
+             echo "</td>\n";
+             echo "<td class='timeline_table' width='".$iconBoxSize."'>\n";*/
             echo "<div class='timeline_value_div_box'>\n";
+            echo "<div class='timeline_value_img_div'>\n";
+            echo "<img class='timeline_value_img' src='http://www.xtour.ch/images/altitude_low_icon.png' width='".$iconSize."'>\n";
+            echo "</div>\n";
             echo "<div class='timeline_value_div' id='timeline_value_div50' style='visibility: visible'>\n";
             echo "<font class='TourDetailFont'>".$sumInfo["time"]."</font>\n";
             echo "</div>\n";
@@ -393,8 +495,8 @@
                 echo "</div>\n";
             }
             echo "</div>\n";
-            echo "</td>\n";
-            echo "</table>\n";
+            //echo "</td>\n";
+            //echo "</table>\n";
             
             //echo "</div>\n";
             echo "</div>\n";
@@ -477,7 +579,7 @@
             //echo "</tr>\n";
             //echo "</table>\n";
             
-            echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+            /*echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td class='comment_table_top_left' width='30' height='30' align='center' valign='middle'><img src='".$img."' width='28'></td>\n";
             echo "<td class='comment_table_top' width='".($width-30)."' valign='bottom'><p style='margin-left: 5px; margin-bottom: 0px;'><font class='CommentHeaderFont'>".$name." am ".date("d.m.Y h:i:s", $date)."</font></p></td>\n";
@@ -486,7 +588,17 @@
             echo "<td class='comment_table_left' width='30' valign='top'></td>\n";
             echo "<td class='comment_table_middle' width='".($width-30)."'><p style='margin-top: 5px; margin-bottom: 5px; margin-left: 0px; margin-right: 5px;'><font class='CommentFont'>".$comment."</font></p></td>\n";
             echo "</tr>\n";
-            echo "</table>\n";
+            echo "</table>\n";*/
+            
+            echo "<div class='comment_container_div'>\n";
+            
+            echo "<div class='comment_img_div'><img src='".$img."' width='30'></div>\n";
+            echo "<div class='comment_header_div'><font class='CommentHeaderFont'>".$name." am ".date("d.m.Y h:i:s", $date)."</font></div>\n";
+            echo "<div class='comment_content_div'>\n";
+            echo "<font class='CommentFont'>".$comment."</font>";
+            echo "</div>\n";
+            
+            echo "</div>\n";
             
         }
         
@@ -521,7 +633,7 @@
             
             $date = time();
             
-            echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+            /*echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td width='30' height='30' valign='top'><img src='".$img."' width='30'></td>\n";
             echo "<td class='comment_table_top' width='".($width-30)."' valign='bottom'></td>\n";
@@ -530,7 +642,16 @@
             echo "<td class='comment_table_left' width='30' valign='top'></td>\n";
             echo "<td class='comment_table_middle' width='".($width-30)."'><p style='margin-top: 0px; margin-bottom: 5px; margin-left: 0px; margin-right: 5px;'><textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(".$tid.",450,\"images/profile_icon_grey.png\",\"Name\",".$date.",this)'></textarea></p></td>\n";
             echo "</tr>\n";
-            echo "</table>\n";
+            echo "</table>\n";*/
+            
+            echo "<div class='comment_container_div'>\n";
+            
+            echo "<div class='comment_img_div'><img src='".$img."' width='30'></div>\n";
+            echo "<div class='comment_content_textfield_div'>\n";
+            echo "<textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(".$tid.",450,\"images/profile_icon_grey.png\",\"Name\",".$date.",this)'></textarea>";
+            echo "</div>\n";
+            
+            echo "</div>\n";
         }
         
         function PrintMapForCoordinates($country, $province, $lon, $lat) {

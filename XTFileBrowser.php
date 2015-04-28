@@ -2,6 +2,7 @@
 
     include_once("XTUtilities.php");
     include_once("XTGPXParser.php");
+    include_once("XTDatabase.php");
     
     class XTFileBrowser {
         var $nImages;
@@ -111,6 +112,32 @@
             if (!file_exists($mergedFile)) {return 0;}
             
             return $mergedFile;
+        }
+        
+        function GetTourKMLFiles($tid) {
+            $db = new XTDatabase();
+            $utilities = new XTUtilities();
+            
+            $db->Connect();
+            
+            $path = $utilities->GetTourPath($tid);
+            
+            $info = $db->GetTourInfo($tid);
+            $tourFiles = array();
+            for ($i = 1; $i < sizeof($info); $i++) {
+                $currentTour = $info[$i];
+                
+                $fname = $path.$tid;
+                if ($currentTour["type"] == 1) {$fname .= "_up";}
+                elseif ($currentTour["type"] == 2) {$fname .= "_down";}
+                
+                $fname .= $currentTour["count"].".kml";
+                
+                if (file_exists($fname)) {$tourFiles[$i-1] = $fname;}
+                else {$tourFiles[$i-1] = 0;}
+            }
+            
+            return $tourFiles;
         }
     }
     

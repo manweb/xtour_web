@@ -66,8 +66,8 @@
             return $name;
         }
         
-        function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude) {
-            $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude')";
+        function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $province) {
+            $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude, total_descent, lowest_point, highest_point, country, province) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude', '$descent', '$lowestPoint', '$highestPoint', '$country', '$province')";
             
             $return = mysql_query($query);
             
@@ -104,6 +104,22 @@
             $return = mysql_query($query2);
             
             return $return;
+        }
+        
+        function InsertNewImage($tour_id, $user_id, $filename, $longitude, $latitude, $elevation, $comment, $date) {
+            $query = "insert into images (tour_id, user_id, filename, longitude, latitude, elevation, comment, date) values ('$tour_id', '$user_id', '$filename', '$longitude', '$latitude', '$elevation', '$comment', '$date')";
+            
+            $return = mysql_query($query);
+            
+            return $return;
+        }
+        
+        function DeleteTour($tid) {
+            $query = "delete from tours where tour_id='$tid'";
+            
+            $return = mysql_query($query);
+            
+            return $result;
         }
         
         function TourExists($tid) {
@@ -198,7 +214,7 @@
             
             $row = mysql_fetch_assoc($result);
             
-            $info = array("date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "country" => $row['country']);
+            $info = array("date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country']);
             
             return $info;
         }
@@ -222,19 +238,57 @@
         }
         
         function GetTourInfo($tid) {
-            $query = "select * from tours where tour_id='$tid' and (tour_type='1' or tour_type='2') order by date asc";
+            $query = "select * from tours where tour_id='$tid' and tour_type='0'";
+            $query2 = "select * from tours where tour_id='$tid' and (tour_type='1' or tour_type='2') order by date asc";
             
             $result = mysql_query($query);
             if (!$result) {return 0;}
             
+            $result2 = mysql_query($query2);
+            if (!$result2) {return 0;}
+            
+            $row = mysql_fetch_assoc($result);
+            
             $info = array();
-            while ($row = mysql_fetch_assoc($result)) {
-                $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "country" => $row['country']);
+            
+            $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country']);
+            
+            array_push($info, $arrTMP);
+            
+            while ($row = mysql_fetch_assoc($result2)) {
+                $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country']);
                 
                 array_push($info, $arrTMP);
             }
             
             return $info;
+        }
+        
+        function GetUserIDForTour($tid) {
+            $query = "select user_id from tours where tour_id='$tid' and tour_type='0'";
+            
+            $result = mysql_query($query);
+            if (!$result) {return 0;}
+            
+            $uid = mysql_fetch_row($result);
+            
+            return $uid;
+        }
+        
+        function GetImageInfoForTour($tid) {
+            $query = "select * from images where tour_id='$tid'";
+            
+            $result = mysql_query($query);
+            
+            $imageInfo = array();
+            
+            while ($row = mysql_fetch_assoc($result)) {
+                $arrTMP = array("latitude" => $row['latitude'], "longitude" => $row['longitude'], "filename" => $row['filename']);
+                
+                array_push($imageInfo, $arrTMP);
+            }
+            
+            return $imageInfo;
         }
     }
 ?>

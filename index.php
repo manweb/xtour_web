@@ -62,26 +62,19 @@ window.onpopstate = function(event) {
 
 <div class="header_div">
 
-<table width='100%' height='100' dalign='center' border='0' cellpadding='0' cellspacing='0'>
-    <tr>
-        <td width='140' align='left' valign='middle' style='padding-left:20px'>
-            <img src='http://www.xtour.ch/images/icon.png' height='80'>
-        </td>
-        <td width='480' align='left' valign='middle' style='padding-left:20px'>
-            <font class='HeaderFont'>Startseite&nbsp;&nbsp;|&nbsp;&nbsp;Touren&nbsp;&nbsp;|&nbsp;&nbsp;Meine Seite&nbsp;&nbsp;|&nbsp;&nbsp;Karte&nbsp;&nbsp;|&nbsp;&nbsp;FAQ</font>
-        </td>
-        <td width='250' align='left' valign='middle' style='padding-left:20px'>
-            <input class='InputField' type='text' width='100' value='Search...' style='color:#cbcbcb' onfocus="if(this.value=='Search...') {this.value='', this.style.color='#595959'};" onblur="if(this.value=='') {this.value='Search...', this.style.color='#cbcbcb';}"><input class='SubmitButton' type='submit' width='20' value='Ok'>
-        </td>
-        <td></td>
-        <td align='center' width='100' valign='middle'>
-            <p><img id='profile_picture' src='http://www.xtour.ch/images/profile_icon.png' width='40'></p>
-            <p style='margin-top:2px'><font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,400,"http://www.xtour.ch/login.php")'>Anmelden</a></font></p>
-        </td>
-    </tr>
-</table>
-
-</p>
+<div class="header_icon"></div>
+<div class="header_menu">
+<font class='HeaderFont'>Startseite&nbsp;&nbsp;|&nbsp;&nbsp;Touren&nbsp;&nbsp;|&nbsp;&nbsp;Meine Seite&nbsp;&nbsp;|&nbsp;&nbsp;Karte&nbsp;&nbsp;|&nbsp;&nbsp;FAQ</font>
+</div>
+<div class="header_search">
+<input class='InputField' type='text' width='100' value='Search...' style='color:#cbcbcb' onfocus="if(this.value=='Search...') {this.value='', this.style.color='#595959'};" onblur="if(this.value=='') {this.value='Search...', this.style.color='#cbcbcb';}"><input class='SubmitButton' type='submit' width='20' value='Ok'>
+</div>
+<div class="header_login">
+<div class="header_login_icon"></div>
+<div class="header_login_text">
+<font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,400,"http://www.xtour.ch/login.php")'>Anmelden</a></font>
+</div>
+</div>
 
 </div>
 

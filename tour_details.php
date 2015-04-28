@@ -11,7 +11,7 @@
     
     $box->PrintBoxWithContent2("<div id='map-canvas' style='height:480px'></div>", 500);
     
-    $box->PrintBoxWithContent2("<div id='chart_div' style='height:280px'></div>",500);
+    $box->PrintBoxWithContent2("<div id='chart_div' style='height:200px'></div>",500);
     
     echo "<script>initialize()</script>\n";
     
