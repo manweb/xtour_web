@@ -366,6 +366,7 @@
             $arr = array();
             
             $arr['cols'][] = array('label' => 'time', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'annotation', 'type' => 'string');
             $arr['cols'][] = array('label' => 'altitude', 'type' => 'number');
             $arr['cols'][] = array('role' => 'tooltip', 'type' => 'string', 'p' => array('role' => 'tooltip'));
             
@@ -383,7 +384,7 @@
                 $minutes = floor(($diff/3600 - $hours)*60);
                 $seconds = (($diff/3600 - $hours)*60 - $minutes)*60;
                 $formattedTime = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-                $arr['rows'][]['c'] = array(array('v' => $diff),array('v' => $TrackPoint["elevation"]),array('v' => $TrackPoint["longitude"].";".$TrackPoint["latitude"]));
+                $arr['rows'][]['c'] = array(array('v' => $diff),array('v' => ''),array('v' => $TrackPoint["elevation"]),array('v' => $TrackPoint["longitude"].";".$TrackPoint["latitude"]));
             }
             
             return json_encode($arr);
@@ -393,7 +394,9 @@
             $arr = array();
             
             $arr['cols'][] = array('label' => 'distance', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'annotation', 'type' => 'string');
             $arr['cols'][] = array('label' => 'altitude', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'tooltip', 'type' => 'string', 'p' => array('role' => 'tooltip'));
             
             if (!$this->TrackPointArray) {return 0;}
             
@@ -408,7 +411,7 @@
                     $lat2 = $this->TrackPointArray[$i]["latitude"];
                     $distance += $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
                 }
-                $arr['rows'][]['c'] = array(array('v' => $distance),array('v' => $this->TrackPointArray[$i]["elevation"]));
+                $arr['rows'][]['c'] = array(array('v' => $distance),array('v' => ''),array('v' => $this->TrackPointArray[$i]["elevation"]),array('v' => $this->TrackPointArray[$i]["longitude"].";".$this->TrackPointArray[$i]["latitude"]));
             }
             
             return json_encode($arr);

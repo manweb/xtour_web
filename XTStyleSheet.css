@@ -482,6 +482,16 @@ a {
     z-index: 102;
 }
 
+.div_overlay_content
+{
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    border-width: 10px;
+    border-color: #dbdbdb;
+    border-style: solid;
+    position: relative;
+}
+
 .div_box_table
 {
     background-size: 15px 15px;

@@ -38,23 +38,8 @@ window.onpopstate = function(event) {
 <div class="div_overlay_box", id="div_box">
     
     <p align='right' style='margin-bottom: 2px'><img src='http://www.xtour.ch/images/div_box_quit.png' width='20' onclick='toggle_dim()'></p>
-    
-    <table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>
-            <td class='div_box_table' background='http://www.xtour.ch/images/div_box_background_upper_left.png'></td>
-            <td bgcolor='#dbdbdb' height='15'></td>
-            <td class='div_box_table' background='http://www.xtour.ch/images/div_box_background_upper_right.png'></td>
-        </tr>
-        <tr>
-            <td bgcolor='#dbdbdb' width='15'></td>
-            <td id='div_box_table' bgcolor='#ffffff' style='padding-top: 5px; padding-left: 5px; padding-right: 5px; padding-bottom: 5px'></td>
-            <td bgcolor='#dbdbdb' width='15'></td>
-        </tr>
-        <tr>
-            <td class='div_box_table' background='http://www.xtour.ch/images/div_box_background_lower_left.png'></td>
-            <td bgcolor='#dbdbdb' height='15'></td>
-            <td class='div_box_table' background='http://www.xtour.ch/images/div_box_background_lower_right.png'></td>
-        </tr>
-    </table>
+
+<div class="div_overlay_content", id="div_dim_content"></div>
 
 </div>
 
@@ -72,7 +57,7 @@ window.onpopstate = function(event) {
 <div class="header_login">
 <div class="header_login_icon"></div>
 <div class="header_login_text">
-<font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,400,"http://www.xtour.ch/login.php")'>Anmelden</a></font>
+<font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,200,"http://www.xtour.ch/login.php")'>Anmelden</a></font>
 </div>
 </div>
 
@@ -105,7 +90,12 @@ window.onpopstate = function(event) {
 
 <div id="MainContent">
 
-<script>LoadMainDiv("http://www.xtour.ch/news_feed.php")</script>
+<?php
+    
+    if ($_GET['tid']) {echo "<script>ShowTourDetails('".$_GET['tid']."')</script>\n";}
+    else {echo "<script>LoadMainDiv('http://www.xtour.ch/news_feed.php')</script>\n";}
+
+?>
 
 </div>
 

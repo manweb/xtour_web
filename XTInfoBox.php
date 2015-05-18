@@ -148,8 +148,13 @@
             $imageEdit = new XTImageEdit();
             $fileBrowser = new XTFileBrowser();
             $parser = new XTGPXParser();
+            $utilities = new XTUtilities();
             
-            $images = $fileBrowser->GetImagesForTour(1000,$tid);
+            $uid = $utilities->GetUserIDFromTour($tid);
+            
+            $path = $utilities->GetTourImagePath($tid);
+            
+            $images = $fileBrowser->GetImagesForTour($tid);
             $nImages = $fileBrowser->GetNumImages();
             
             $mergedFile = $fileBrowser->GetMergedFile($tid);
@@ -208,7 +213,7 @@
             else {$n = 3;}
             if ($images) {
                 for ($i = 0; $i < $n; $i++) {
-                    $img = $images[$i];
+                    $img = $path.$images[$i];
                     $img2 = str_replace(".jpg","_thumb.jpg",$img);
                     if (!file_exists($img2)) {$imageEdit->GetSquareImage($img,200);}
                     echo "<img src='".$img2."' width='45px' onmouseover='LoadMovingDiv(this)'; onmouseout='HideMovingDiv()';>\n";
@@ -266,7 +271,7 @@
             
             $utilities = new XTUtilities();
             
-            $UserIcon = $utilities->GetUserIconForTour($tid);
+            $UserIcon = $utilities->GetUserIconForTour($tid,"f");
             $UserName = $utilities->GetFullUserNameFromTour($tid);
             
             $sumInfo = $db->GetTourSumInfo($tid);
@@ -278,7 +283,7 @@
             $sectionWidth = floor(($width-20)/$nSections);
             
             echo "<div class='box_div' style='width: ".($width-20)."; height: 150px;'>\n";
-            echo "<div style='position: absolute; top: -10px; left: -10px'><img src='http://www.xtour.ch/".$UserIcon."' width='40px'></div>\n";
+            echo "<div style='position: absolute; top: -10px; left: -10px'><img src='".$UserIcon."' width='40px'></div>\n";
             echo "<div style='position: relative; top: 5px; left: 25px; height: 25px'><font class='CommentHeaderFont'>".$UserName." war am ".date("l d.m.Y",$sumInfo["date"])." auf einer Tour in der Region ".$sumInfo["province"]." (".$sumInfo["country"].")</font></div>\n";
             
             for ($i = 0; $i < $nSections; $i++) {
@@ -312,6 +317,8 @@
                         if ($i == 0 && $k == 1) {echo $info[$n]["distance"]*1000.0." ".$unit;}
                         if ($i == 0 && $k == 2) {echo round($info[$n]["distance"]/$info[$n]["time"]*3600000.0)." ".$unit;}
                         if ($i == 0 && $k == 3) {echo $info[$n]["ascent"]." ".$unit;}
+                        if ($i == 1 && $k == 0) {echo $info[$n]["lowestPoint"]." ".$unit;}
+                        if ($i == 1 && $k == 1) {echo $info[$n]["highestPoint"]." ".$unit;}
                         echo "</font>\n";
                         echo "</div>\n";
                     }
@@ -499,6 +506,78 @@
             //echo "</table>\n";
             
             //echo "</div>\n";
+            echo "</div>\n";
+        }
+        
+        function PrintGraphBox($tid, $width) {
+            echo "<div class='box_div' style='width: ".($width-20)."px; height: 240px;'>\n";
+            
+            $titles = array("Höhe - Zeit","Höhe - Distanz","Distanz-Zeit");
+            
+            $nSections = sizeof($titles);
+            
+            $sectionWidth = floor(($width-20)/$nSections);
+            
+            for ($i = 0; $i < $nSections; $i++) {
+                $offset = $i*$sectionWidth + 10;
+                
+                $title = $titles[$i];
+                
+                echo "<div style='position:absolute; top: 10px; left: ".$offset."px; padding-left: 5px; padding-top: 5px; width: ".($sectionWidth-5)."px; height: 17px; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #dbdbdb;' onclick='MoveGraphTabDiv(".$tid.",".$i.",".$offset.")'><a href='javascript:void(0)'><font class='TimeLineFont'>".$title."</font></a></div>\n";
+            }
+            
+            echo "<div class='tab_div' id='GraphTabDiv' style='position:absolute; top: 7px; left: 10px; width: ".$sectionWidth."px; height: 22px; border-top-style: solid; border-left-style: solid; border-right-style: solid; border-bottom-style: solid; border-top-width: 3px; border-left-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-top-color: #468ec8; border-left-color: #dbdbdb; border-right-color: #dbdbdb; border-bottom-color: #ffffff;'></div>\n";
+            
+            echo "<div id='chart_div' style='width: ".($width-40)."px; height: 200px; position: absolute; top: 35px; left: 10px;'></div>";
+            
+            echo "</div>\n";
+        }
+        
+        function PrintImageBox($tid, $width) {
+            $imageEdit = new XTImageEdit();
+            $fileBrowser = new XTFileBrowser();
+            $utilities = new XTUtilities();
+            
+            $path = $utilities->GetTourImagePath($tid,"f");
+            
+            $images = $fileBrowser->GetImagesForTour($tid);
+            $nImages = $fileBrowser->GetNumImages();
+            
+            $nImagesPerColumn = floor(($width-30)/85);
+            $imageMargin = floor(($width-30 - 80*$nImagesPerColumn)/($nImagesPerColumn-1));
+            
+            $nRows = ceil($nImages/$nImagesPerColumn);
+            
+            echo "<div class='box_div' style='width: ".($width-20)."'>\n";
+            
+            echo "<table width='".($width-30)."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+            for ($i = 0; $i < $nRows; $i++) {
+                echo "<tr>\n";
+                for ($k = 0; $k < $nImagesPerColumn; $k++) {
+                    $n = $i*$nImagesPerColumn + $k;
+                    
+                    if ($k < $nImagesPerColumn-1) {
+                        echo "<td width='".(80+$imageMargin)."' align='left' style='padding-bottom: 10px'>\n";
+                    }
+                    else {
+                        echo "<td align='left' style='padding-bottom: 10px'>\n";
+                    }
+                    
+                    if ($n < $nImages) {
+                        $img = $images[$n];
+                        $imgPath = $path.$img;
+                        $img2 = str_replace(".jpg","_thumb.jpg",$imgPath);
+                        if (!file_exists($img2)) {$imageEdit->GetSquareImage($imgPath,200);}
+                    
+                        echo "<a href='javascript:void(0)' onclick='toggle_dim(400, 400, \"http://www.xtour.ch/show_picture.php?tid=".$tid."&fname=".$img."\")'><img src='".$img2."' width='80'></a>\n";
+                    }
+                    echo "</td>\n";
+                }
+                echo "</tr>\n";
+            }
+            
+            echo "</table>\n";
+            
             echo "</div>\n";
         }
         

@@ -152,6 +152,9 @@
                 $arrTMP["total_time"] = $row['total_time'];
                 $arrTMP["total_distance"] = $row['total_distance'];
                 $arrTMP["total_altitude"] = $row['total_altitude'];
+                $arrTMP["total_descent"] = $row['total_descent'];
+                $arrTMP["lowest_point"] = $row['lowest_point'];
+                $arrTMP["highest_point"] = $row['highest_point'];
                 $arrTMP["country"] = $row['country'];
                 $arrTMP["province"] = $row['province'];
                 
@@ -283,7 +286,7 @@
             $imageInfo = array();
             
             while ($row = mysql_fetch_assoc($result)) {
-                $arrTMP = array("latitude" => $row['latitude'], "longitude" => $row['longitude'], "filename" => $row['filename']);
+                $arrTMP = array("date" => $row['date'], "latitude" => $row['latitude'], "longitude" => $row['longitude'], "elevation" => $row['elevation'], "comment" => $row['comment'], "filename" => $row['filename']);
                 
                 array_push($imageInfo, $arrTMP);
             }

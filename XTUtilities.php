@@ -26,16 +26,28 @@
             return $db->GetUserNameForID($id);
         }
         
-        function GetTourPath($tid) {
+        function GetTourPath($tid, $option) {
             $uid = $this->GetUserIDFromTour($tid);
             
-            return "users/".$uid."/tours/".$tid."/";
+            $path = "users/".$uid."/tours/".$tid."/";
+            
+            if ($option == "f") {$path = "http://www.xtour.ch/".$path;}
+            
+            return $path;
         }
         
-        function GetUserIconForTour($tid) {
+        function GetTourImagePath($tid, $option) {
+            return $this->GetTourPath($tid, $option)."images/";
+        }
+        
+        function GetUserIconForTour($tid, $option) {
             $uid = $this->GetUserIDFromTour($tid);
             
-            return "users/".$uid."/profile.png";
+            $path = "users/".$uid."/profile.png";
+            
+            if ($option == "f") {$path = "http://www.xtour.ch/".$path;}
+            
+            return $path;
         }
         
         function GetMapNameForCountry($country, $province) {

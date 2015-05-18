@@ -3,18 +3,37 @@
     include_once("XTUtilities.php");
     include_once("XTGPXParser.php");
     include_once("XTDatabase.php");
+    include_once("XTImageEdit.php");
     
     class XTFileBrowser {
         var $nImages;
         
-        function GetImagesForTour($uid, $tid) {
+        function GetImagesForTour($tid,$option,$small) {
+            $utilities = new XTUtilities();
+            
+            $uid = $utilities->GetUserIDFromTour($tid);
+            
             $images = array();
             
             $dir = "users/".$uid."/tours/".$tid."/images/";
             if ($handle = opendir($dir)) {
                 while (false !== ($file = readdir($handle))) {
                     if ($file != "." && $file != ".." && strtolower(substr($file, strpos($file, '.') + 1)) == 'jpg' && !strpos($file, '_thumb.jpg')) {
-                        array_push($images,$dir.$file);
+                        
+                        if ($small) {
+                            $img = str_replace(".jpg","_thumb.jpg",$file);
+                            
+                            if (!file_exists($img)) {
+                                $imageEdit = new XTImageEdit();
+                                
+                                $imageEdit->GetSquareImage($dir.$file,200);
+                            }
+                            
+                            $file = $img;
+                        }
+                        
+                        if ($option == "f") {$file = "http://www.xtour.ch/".$dir.$file;}
+                        array_push($images,$file);
                     }
                 }
             }
@@ -138,6 +157,38 @@
             }
             
             return $tourFiles;
+        }
+        
+        function GetTourGPXFiles($tid) {
+            $utilities = new XTUtilities();
+            
+            $path = $utilities->GetTourPath($tid);
+            
+            $gpx_files = array();
+            $files = scandir($path);
+            foreach ($files as $file) {
+                if (pathinfo($file, PATHINFO_EXTENSION) != "gpx" && pathinfo($file, PATHINFO_EXTENSION) != "GPX") {continue;}
+                
+                array_push($gpx_files,$path.$file);
+            }
+            
+            return $gpx_files;
+        }
+        
+        function FileExists($file) {
+            $ch = curl_init($file);
+            curl_setopt($ch, CURLOPT_NOBODY, true);
+            curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            if($code == 200){
+                $status = true;
+            }else{
+                $status = false;
+            }
+            curl_close($ch);
+            
+            return $status;
         }
     }
     

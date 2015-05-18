@@ -124,23 +124,82 @@ function drawChart(tid, type) {
     // Create our data table out of JSON data loaded from server.
     data = new google.visualization.DataTable(jsonData);
     
+    data.addRow([null, null, null, null]);
+    var annotationRowIndex = data.getNumberOfRows() - 1;
+    
     var minTime = data.getColumnRange(0).min;
     var maxTime = data.getColumnRange(0).max;
     var timeSTP = Math.round((maxTime-minTime)/4);
     
     var tickLabels = [{v:(minTime),f:FormatSeconds(minTime)},{v:(minTime+timeSTP),f:FormatSeconds(minTime+timeSTP)},{v:(minTime+2*timeSTP),f:FormatSeconds(minTime+2*timeSTP)},{v:(minTime+3*timeSTP),f:FormatSeconds(minTime+3*timeSTP)},{v:(maxTime),f:FormatSeconds(maxTime)}];
     
+    var container = document.getElementById('chart_div');
+    
     // Instantiate and draw our chart, passing in some options.
     chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
     
     var options;
     if (drawType == 1) {
-        options = {hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+        options = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
     }
-    else {options = {tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}}
-    chart.draw(data, options);
+    else {options = {annotation: {1: {style: 'line'}}, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}}
+    //chart.draw(data, options);
     
-    google.visualization.events.addListener(chart, 'onmouseover', chartMouseOver);
+    //google.visualization.events.addListener(chart, 'onmouseover', chartMouseOver);
+    
+    var runOnce = google.visualization.events.addListener(chart, 'ready', function () {
+                                                          google.visualization.events.removeListener(runOnce);
+                                                          
+                                                          // create mousemove event listener in the chart's container
+                                                          // I use jQuery, but you can use whatever works best for you
+                                                          $(container).mousemove(function (e) {
+                                                                                 var xPos = e.pageX - container.offsetLeft - 320;
+                                                                                 var yPos = e.pageY - container.offsetTop - 800;
+                                                                                 var cli = chart.getChartLayoutInterface();
+                                                                                 var xBounds = cli.getBoundingBox('hAxis#0#gridline');
+                                                                                 var yBounds = cli.getBoundingBox('vAxis#0#gridline');
+                                                                                 
+                                                                                 // is the mouse inside the chart area?
+                                                                                 if (
+                                                                                     (xPos >= xBounds.left || xPos <= xBounds.left + xBounds.width) &&
+                                                                                     (yPos >= yBounds.top || yPos <= yBounds.top + yBounds.height)
+                                                                                     ) {
+                                                                                 // if so, draw the vertical line here
+                                                                                 // get the x-axis value at these coordinates
+                                                                                 var xVal = cli.getHAxisValue(xPos);
+                                                                                 
+                                                                                 var id = GetClosestValue(xVal);
+                                                                                 
+                                                                                 // set the x-axis value of the annotation
+                                                                                 data.setValue(annotationRowIndex, 0, data.getValue(id, 0).toString());
+                                                                                 // set the value to display on the line, this could be any value you want
+                                                                                 //data.setValue(annotationRowIndex, 1, xVal.toFixed(2));
+                                                                                 
+                                                                                 // get the data value (if any) at the line
+                                                                                 // truncating xVal to one decimal place,
+                                                                                 // since it is unlikely to find an annotation like that aligns precisely with the data
+                                                                                 /*var rows = data.getFilteredRows([{column: 0, value: xVal}]);
+                                                                                 if (rows.length) {
+                                                                                 value = data.getValue(rows[0], 2).toString();
+                                                                                 // do something with value
+                                                                                 }*/
+                                                                                 
+                                                                                 data.setValue(annotationRowIndex, 1, data.getValue(id, 2).toFixed(1)+' m');
+                                                                                 
+                                                                                 var position = data.getValue(id,3);
+                                                                                 var coordinates = position.split(";");
+                                                                                 
+                                                                                 var LatLng = new google.maps.LatLng(coordinates[1],coordinates[0]);
+                                                                                 marker.setPosition(LatLng);
+                                                                                 
+                                                                                 // draw the chart with the new annotation
+                                                                                 chart.draw(data, options);
+                                                                                 }
+                                                                                 });
+                                                          });
+    
+    // draw the chart
+    chart.draw(data, options);
 }
 
 function chartMouseOver(e) {
@@ -149,6 +208,21 @@ function chartMouseOver(e) {
     
     var LatLng = new google.maps.LatLng(coordinates[1],coordinates[0]);
     marker.setPosition(LatLng);
+}
+
+function GetClosestValue(value) {
+    var nRows = data.getNumberOfRows();
+    
+    var currentValue;
+    var minDistance = Math.abs(value - data.getValue(0, 0));
+    var id = 0;
+    for (var i = 1; i < nRows; i++) {
+        currentValue = data.getValue(i, 0);
+        
+        if (Math.abs(value - currentValue) < minDistance) {minDistance = Math.abs(value - currentValue); id = i;}
+    }
+    
+    return id;
 }
 
 function FormatSeconds(s) {
@@ -193,14 +267,14 @@ function toggle_dim(width, height, content) {
         {
             if (xmlhttp.readyState==4 && xmlhttp.status==200)
             {
-                document.getElementById('div_box_table').innerHTML=xmlhttp.responseText;
+                document.getElementById('div_dim_content').innerHTML=xmlhttp.responseText;
             }
         }
         xmlhttp.open('GET',content,true);
         xmlhttp.send();
     }
     else {
-        document.getElementById('div_box_table').innerHTML = "";
+        document.getElementById('div_dim_content').innerHTML = "";
         div_dim.style.display = "";
         div_box.style.display = "";
     }
@@ -221,7 +295,7 @@ function ValidateLogin() {
     var userpwd = document.getElementById('login_pwd').value;
     var request = 'validate_login.php?uid='+userid+'&pwd='+userpwd;
     
-    document.getElementById('div_box_table').innerHTML = "Validating";
+    document.getElementById('div_dim_content').innerHTML = "Validating";
     
     if (window.XMLHttpRequest)
     {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -237,13 +311,13 @@ function ValidateLogin() {
         {
             var UID = xmlhttp.responseText.toString().toLowerCase();
             if (UID != "false") {
-                document.getElementById('div_box_table').innerHTML = "Login successful!";
+                document.getElementById('div_dim_content').innerHTML = "Login successful!";
                 //document.getElementById('profile_picture').src = "users/" + UID + "/profile.png";
                 document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('users/" + UID + "/profile.png')";
             }
-            else {document.getElementById('div_box_table').innerHTML = "Login failed!";}
+            else {document.getElementById('div_dim_content').innerHTML = "Login failed!";}
         }
-        else {document.getElementById('div_box_table').innerHTML = "There was a problem verifying the user.";}
+        else {document.getElementById('div_dim_content').innerHTML = "There was a problem verifying the user.";}
     }
     xmlhttp.open('GET',request,true);
     xmlhttp.send();
@@ -289,13 +363,15 @@ function AddHistoryEntry(path)
 
 function ShowTourDetails(tid)
 {
-    var e = window.event;
-    var el;
-    if (e.target) {el = e.target.nodeName.toLowerCase();}
-    else if (e.srcElement) {el = e.srcElement.nodeName.toLowerCase();}
-    
-    if (el == 'textarea' || el == 'a') {return;}
-    if (el == 'img' && (e.target.id == 'feedbox_close' || e.srcElement.id == 'feedbox_close')) {return;}
+    if (window.event) {
+        var e = window.event;
+        var el;
+        if (e.target) {el = e.target.nodeName.toLowerCase();}
+        else if (e.srcElement) {el = e.srcElement.nodeName.toLowerCase();}
+        
+        if (el == 'textarea' || el == 'a') {return;}
+        if (el == 'img' && (e.target.id == 'feedbox_close' || e.srcElement.id == 'feedbox_close')) {return;}
+    }
     
     var content = "tour_details.php?tid=" + tid;
     var hist = "/tours/" + tid;
@@ -460,6 +536,16 @@ function MoveTabDiv(id, position)
             else {kmlLayers[i].setMap(null);}
         }
     }
+}
+
+function MoveGraphTabDiv(tid, id, position)
+{
+    var e = document.getElementById("GraphTabDiv");
+    
+    e.style.left = position;
+    
+    if (id == 0) {drawChart(tid,1);}
+    if (id == 1) {drawChart(tid,2);}
 }
 
 function DeleteTour(tid)
