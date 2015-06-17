@@ -2,7 +2,15 @@ var kmlLayers = [];
 var map;
 var chart;
 var data;
+var data1;
+var data2;
+var data3;
+var options;
+var options1;
+var options2;
+var options3;
 var marker;
+var drawType;
 
 $(window).scroll(function() {
                  var offset = window.pageYOffset;
@@ -109,43 +117,11 @@ function init() {
     map.addLayer(vector);
 }
 
-function drawChart(tid, type) {
-    var drawType;
-    
-    if (!type) {drawType = 1;}
-    else {drawType = type;}
-    
-    var jsonData = $.ajax({
-                          url: "http://www.xtour.ch/get_elevation_profile.php?tid=" + tid + "&type=" + drawType,
-                          dataType:"json",
-                          async: false
-                          }).responseText;
-    
-    // Create our data table out of JSON data loaded from server.
-    data = new google.visualization.DataTable(jsonData);
-    
+function redrawChart() {
     data.addRow([null, null, null, null]);
     var annotationRowIndex = data.getNumberOfRows() - 1;
     
-    var minTime = data.getColumnRange(0).min;
-    var maxTime = data.getColumnRange(0).max;
-    var timeSTP = Math.round((maxTime-minTime)/4);
-    
-    var tickLabels = [{v:(minTime),f:FormatSeconds(minTime)},{v:(minTime+timeSTP),f:FormatSeconds(minTime+timeSTP)},{v:(minTime+2*timeSTP),f:FormatSeconds(minTime+2*timeSTP)},{v:(minTime+3*timeSTP),f:FormatSeconds(minTime+3*timeSTP)},{v:(maxTime),f:FormatSeconds(maxTime)}];
-    
     var container = document.getElementById('chart_div');
-    
-    // Instantiate and draw our chart, passing in some options.
-    chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-    
-    var options;
-    if (drawType == 1) {
-        options = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
-    }
-    else {options = {annotation: {1: {style: 'line'}}, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}}
-    //chart.draw(data, options);
-    
-    //google.visualization.events.addListener(chart, 'onmouseover', chartMouseOver);
     
     var runOnce = google.visualization.events.addListener(chart, 'ready', function () {
                                                           google.visualization.events.removeListener(runOnce);
@@ -179,12 +155,134 @@ function drawChart(tid, type) {
                                                                                  // truncating xVal to one decimal place,
                                                                                  // since it is unlikely to find an annotation like that aligns precisely with the data
                                                                                  /*var rows = data.getFilteredRows([{column: 0, value: xVal}]);
-                                                                                 if (rows.length) {
-                                                                                 value = data.getValue(rows[0], 2).toString();
-                                                                                 // do something with value
-                                                                                 }*/
+                                                                                  if (rows.length) {
+                                                                                  value = data.getValue(rows[0], 2).toString();
+                                                                                  // do something with value
+                                                                                  }*/
                                                                                  
-                                                                                 data.setValue(annotationRowIndex, 1, data.getValue(id, 2).toFixed(1)+' m');
+                                                                                 var unit;
+                                                                                 if (drawType == 1) {unit = ' m';}
+                                                                                 if (drawType == 2) {unit = ' m';}
+                                                                                 if (drawType == 3) {unit = ' km';}
+                                                                                 
+                                                                                 data.setValue(annotationRowIndex, 1, data.getValue(id, 2).toFixed(1)+unit);
+                                                                                 
+                                                                                 var position = data.getValue(id,3);
+                                                                                 var coordinates = position.split(";");
+                                                                                 
+                                                                                 var LatLng = new google.maps.LatLng(coordinates[1],coordinates[0]);
+                                                                                 marker.setPosition(LatLng);
+                                                                                 
+                                                                                 // draw the chart with the new annotation
+                                                                                 chart.draw(data, options);
+                                                                                 }
+                                                                                 });
+                                                          });
+    chart.draw(data, options);
+}
+
+function drawChart(tid) {
+    if (!drawType) {drawType = 1;}
+    
+    var jsonData1 = $.ajax({
+                          url: "http://www.xtour.ch/get_elevation_profile.php?tid=" + tid + "&type=1",
+                          dataType:"json",
+                          async: false
+                          }).responseText;
+    
+    var jsonData2 = $.ajax({
+                           url: "http://www.xtour.ch/get_elevation_profile.php?tid=" + tid + "&type=2",
+                           dataType:"json",
+                           async: false
+                           }).responseText;
+    
+    var jsonData3 = $.ajax({
+                           url: "http://www.xtour.ch/get_elevation_profile.php?tid=" + tid + "&type=3",
+                           dataType:"json",
+                           async: false
+                           }).responseText;
+    
+    // Create our data table out of JSON data loaded from server.
+    data1 = new google.visualization.DataTable(jsonData1);
+    data2 = new google.visualization.DataTable(jsonData2);
+    data3 = new google.visualization.DataTable(jsonData3);
+    
+    data1.addRow([null, null, null, null]);
+    data2.addRow([null, null, null, null]);
+    data3.addRow([null, null, null, null]);
+    
+    data = data1;
+    
+    var annotationRowIndex = data.getNumberOfRows() - 1;
+    
+    var minTime = data.getColumnRange(0).min;
+    var maxTime = data.getColumnRange(0).max;
+    var timeSTP = Math.round((maxTime-minTime)/4);
+    
+    var tickLabels = [{v:(minTime),f:FormatSeconds(minTime)},{v:(minTime+timeSTP),f:FormatSeconds(minTime+timeSTP)},{v:(minTime+2*timeSTP),f:FormatSeconds(minTime+2*timeSTP)},{v:(minTime+3*timeSTP),f:FormatSeconds(minTime+3*timeSTP)},{v:(maxTime),f:FormatSeconds(maxTime)}];
+    
+    // Instantiate and draw our chart, psassing in some options.
+    chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+    
+    options1 = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+    options1withAnimation = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}, animation: {duration: 1000, easing: 'in'}}
+    
+    options2 = {annotation: {1: {style: 'line'}}, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+    options2withAnimation = {annotation: {1: {style: 'line'}}, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'},animation: {duration: 1000, easing: 'in'}}
+    
+    options3 = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+    options3withAnimation = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}, animation: {duration: 1000, easing: 'in'}}
+    
+    options = options1;
+    //chart.draw(data, options);
+    
+    //google.visualization.events.addListener(chart, 'onmouseover', chartMouseOver);
+    
+    var container = document.getElementById('chart_div');
+    
+    var runOnce = google.visualization.events.addListener(chart, 'ready', function () {
+                                                          google.visualization.events.removeListener(runOnce);
+                                                          
+                                                          // create mousemove event listener in the chart's container
+                                                          // I use jQuery, but you can use whatever works best for you
+                                                          $(container).mousemove(function (e) {
+                                                                                 var xPos = e.pageX - container.offsetLeft - 320;
+                                                                                 var yPos = e.pageY - container.offsetTop - 800;
+                                                                                 var cli = chart.getChartLayoutInterface();
+                                                                                 var xBounds = cli.getBoundingBox('hAxis#0#gridline');
+                                                                                 var yBounds = cli.getBoundingBox('vAxis#0#gridline');
+                                                                                 
+                                                                                 // is the mouse inside the chart area?
+                                                                                 if (
+                                                                                     (xPos >= xBounds.left || xPos <= xBounds.left + xBounds.width) &&
+                                                                                     (yPos >= yBounds.top || yPos <= yBounds.top + yBounds.height)
+                                                                                     ) {
+                                                                                 // if so, draw the vertical line here
+                                                                                 // get the x-axis value at these coordinates
+                                                                                 var xVal = cli.getHAxisValue(xPos);
+                                                                                 
+                                                                                 var id = GetClosestValue(xVal);
+                                                                                 
+                                                                                 // set the x-axis value of the annotation
+                                                                                 data.setValue(annotationRowIndex, 0, data.getValue(id, 0).toString());
+                                                                                 // set the value to display on the line, this could be any value you want
+                                                                                 //data.setValue(annotationRowIndex, 1, xVal.toFixed(2));
+                                                                                 
+                                                                                 // get the data value (if any) at the line
+                                                                                 // truncating xVal to one decimal place,
+                                                                                 // since it is unlikely to find an annotation like that aligns precisely with the data
+                                                                                 /*var rows = data.getFilteredRows([{column: 0, value: xVal}]);
+                                                                                  if (rows.length) {
+                                                                                  value = data.getValue(rows[0], 2).toString();
+                                                                                  // do something with value
+                                                                                  }*/
+                                                                                 
+                                                                                 var unit;
+                                                                                 if (drawType == 1) {unit = ' m';}
+                                                                                 if (drawType == 2) {unit = ' m';}
+                                                                                 if (drawType == 3) {unit = ' km';}
+                                                                                 
+                                                                                 data.setValue(annotationRowIndex, 1, data.getValue(id, 2).toFixed(1)+unit);
                                                                                  
                                                                                  var position = data.getValue(id,3);
                                                                                  var coordinates = position.split(";");
@@ -198,7 +296,6 @@ function drawChart(tid, type) {
                                                                                  });
                                                           });
     
-    // draw the chart
     chart.draw(data, options);
 }
 
@@ -255,6 +352,8 @@ function toggle_dim(width, height, content) {
         div_dim.style.display = "block";
         div_box.style.display = "block";
         
+        document.getElementById('div_dim_content').innerHTML="<p align='center' style='padding-top: "+(height/2-20)+"px'><img src='http://www.xtour.ch/images/loading.gif' width='80'></p>";
+        
         if (window.XMLHttpRequest)
         {// code for IE7+, Firefox, Chrome, Opera, Safari
             xmlhttp=new XMLHttpRequest();
@@ -268,6 +367,24 @@ function toggle_dim(width, height, content) {
             if (xmlhttp.readyState==4 && xmlhttp.status==200)
             {
                 document.getElementById('div_dim_content').innerHTML=xmlhttp.responseText;
+                
+                if (content.indexOf("show_picture.php") > -1) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var ratio = this.height/this.width;
+                        
+                        var newWidth = 400/ratio+40;
+                        var newHeight = 440;
+                        
+                        var div_box = document.getElementById("div_box");
+                        
+                        div_box.style.width = newWidth;
+                        div_box.style.height = newHeight;
+                        div_box.style.marginLeft = -newWidth / 2;
+                        div_box.style.marginTop = -newHeight / 2;
+                    }
+                    img.src = document.getElementById("ImageDetail").src;
+                }
             }
         }
         xmlhttp.open('GET',content,true);
@@ -314,6 +431,17 @@ function ValidateLogin() {
                 document.getElementById('div_dim_content').innerHTML = "Login successful!";
                 //document.getElementById('profile_picture').src = "users/" + UID + "/profile.png";
                 document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('users/" + UID + "/profile.png')";
+                document.querySelectorAll('.header_login_text')[0].innerHTML = "<font class='HeaderFont' size='12'><a class='header_link' href='javascript::void()' onclick='logout()'>Ausloggen</a></font>";
+                
+                var commentImg = document.querySelectorAll('.comment_img_div');
+                
+                for (var i = 0; i < commentImg.length; i++) {
+                    commentImg[i].style.backgroundImage = "url('users/"+UID+"/profile.png')";
+                }
+                
+                setCookie("userID",UID,7);
+                
+                toggle_dim();
             }
             else {document.getElementById('div_dim_content').innerHTML = "Login failed!";}
         }
@@ -395,12 +523,10 @@ function textarea_resize(t) {
     t.style.height = (t.scrollHeight  + offset ) + 'px';
 }
 
-function captureEnter(tid, width, img, name, date, comment)
+function captureEnter(tid, width, comment)
 {
     if (window.event.keyCode == 13 && window.event.shiftKey) {
-        date *= 1000;
-        
-        var d = new Date(date);
+        var d = new Date();
         var day = d.getDate();
         if (day < 10) {day = "0" + day;}
         var month = d.getMonth() + 1;
@@ -414,8 +540,24 @@ function captureEnter(tid, width, img, name, date, comment)
         var formattedDate = day + "." + month + "." + d.getFullYear() + " " + hours + ":" + minutes + ":" + seconds;
         var comment_text = comment.value;
         
+        var UID = getCookie("userID");
+        var name;
+        var img;
+        if (!UID) {
+            name = "Guest";
+            img = "http://www.xtour.ch/images/profile_icon_grey.png";
+        }
+        else {
+            name = $.ajax({
+                          url: "http://www.xtour.ch/get_username_from_ID.php?uid="+UID,
+                          async: false
+                          }).responseText;
+            img = "http://www.xtour.ch/users/"+UID+"/profile.png";
+        }
+        
         var content = "<div class='comment_container_div'>\n";
-        content += "<div class='comment_img_div'><img src='" + img + "' width='30'></div>\n";
+        content += "<div class='comment_img_div2'><img src='" + img + "' width='30'></div>\n";
+        content += "<div class='comment_edit_icons'><img src='http://www.xtour.ch/images/edit_icon.png' width='10'><img src='http://www.xtour.ch/images/close_icon.png' width='10'></div>\n";
         content += "<div class='comment_header_div'><font class='CommentHeaderFont'>" + name + " am " + formattedDate + "</font></div>\n";
         content += "<div class='comment_content_div'>\n";
         content += "<font class='CommentFont'>" + comment_text + "</font>";
@@ -544,8 +686,15 @@ function MoveGraphTabDiv(tid, id, position)
     
     e.style.left = position;
     
-    if (id == 0) {drawChart(tid,1);}
-    if (id == 1) {drawChart(tid,2);}
+    if (id == 0) {data = data1; options = options1withAnimation; drawType = 1;}
+    if (id == 1) {data = data2; options = options2withAnimation; drawType = 2;}
+    if (id == 2) {data = data3; options = options3withAnimation; drawType = 3;}
+    
+    chart.draw(data, options);
+    
+    if (id == 0) {options = options1;}
+    if (id == 1) {options = options2;}
+    if (id == 2) {options = options3;}
 }
 
 function DeleteTour(tid)
@@ -554,4 +703,35 @@ function DeleteTour(tid)
     $(e).fadeTo(800, 0, function() {
                 $(e).animate({height:'0'},300,'swing',function() {$(e).hide();});
                 });
+}
+
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+    }
+    return "";
+}
+
+function logout() {
+    document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('images/profile_icon.png')";
+    document.querySelectorAll('.header_login_text')[0].innerHTML = "<font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,200,\"http://www.xtour.ch/login.php\")'>Anmelden</a></font>";
+    
+    var commentImg = document.querySelectorAll('.comment_img_div');
+    
+    for (var i = 0; i < commentImg.length; i++) {
+        commentImg[i].style.backgroundImage = "url('images/profile_icon_grey.png')";
+    }
+    
+    document.cookie = "userID=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 }

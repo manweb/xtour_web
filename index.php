@@ -55,10 +55,22 @@ window.onpopstate = function(event) {
 <input class='InputField' type='text' width='100' value='Search...' style='color:#cbcbcb' onfocus="if(this.value=='Search...') {this.value='', this.style.color='#595959'};" onblur="if(this.value=='') {this.value='Search...', this.style.color='#cbcbcb';}"><input class='SubmitButton' type='submit' width='20' value='Ok'>
 </div>
 <div class="header_login">
-<div class="header_login_icon"></div>
-<div class="header_login_text">
-<font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,200,"http://www.xtour.ch/login.php")'>Anmelden</a></font>
-</div>
+
+<?php
+    if (isset($_COOKIE["userID"])) {
+        echo "<div class='header_login_icon' style='background-image: url(\"users/".$_COOKIE["userID"]."/profile.png\")'></div>\n";
+        echo "<div class='header_login_text'>\n";
+        echo "<font class='HeaderFont' size='12'><a class='header_link' href='javascript::void()' onclick='logout()'>Ausloggen</a></font>\n";
+        echo "</div>\n";
+    }
+    else {
+        echo "<div class='header_login_icon'></div>\n";
+        echo "<div class='header_login_text'>\n";
+        echo "<font class='HeaderFont' size='12'><a class='header_link' href='javascript:toggle_dim(300,200,\"http://www.xtour.ch/login.php\")'>Anmelden</a></font>\n";
+        echo "</div>\n";
+    }
+?>
+
 </div>
 
 </div>
@@ -84,7 +96,7 @@ window.onpopstate = function(event) {
     
     if (!$DB->VerifyUser("weber_manuel@hotmail.com", md5("password"))) {echo "User doesn't exist!<br>";}
     
-    $IB->PrintBoxWithContent("Info here", 300); ?>
+    $IB->PrintBoxWithContent2("Info here", 300); ?>
         </td>
         <td width='700' align='left' valign='top' style='padding-left: 20px'>
 

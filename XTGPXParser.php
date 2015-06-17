@@ -403,7 +403,7 @@
             $distance = 0;
             $num = $this->GetNumberOfTrackPoints();
             for ($i = 0; $i < $num; $i++) {
-                if ($TrackPoint["elevation"] == -999) {continue;}
+                if ($this->TrackPointArray[$i]["elevation"] == -999) {continue;}
                 if ($i > 0) {
                     $lon1 = $this->TrackPointArray[$i-1]["longitude"];
                     $lat1 = $this->TrackPointArray[$i-1]["latitude"];
@@ -412,6 +412,77 @@
                     $distance += $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
                 }
                 $arr['rows'][]['c'] = array(array('v' => $distance),array('v' => ''),array('v' => $this->TrackPointArray[$i]["elevation"]),array('v' => $this->TrackPointArray[$i]["longitude"].";".$this->TrackPointArray[$i]["latitude"]));
+            }
+            
+            return json_encode($arr);
+        }
+        
+        function GetDistanceTable() {
+            $arr = array();
+            
+            $arr['cols'][] = array('label' => 'time', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'annotation', 'type' => 'string');
+            $arr['cols'][] = array('label' => 'distance', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'tooltip', 'type' => 'string', 'p' => array('role' => 'tooltip'));
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $startTime = $this->GetStartTime();
+            $unixStartTime = strtotime($startTime);
+            
+            $distance = 0;
+            $num = $this->GetNumberOfTrackPoints();
+            for ($i = 0; $i < $num; $i++) {
+                $TrackPoint = $this->TrackPointArray[$i];
+                $time = strtotime($TrackPoint["time"]);
+                $diff = $time - $unixStartTime;
+                if ($diff < 0) {continue;}
+                $hours = floor($diff/3600);
+                $minutes = floor(($diff/3600 - $hours)*60);
+                $seconds = (($diff/3600 - $hours)*60 - $minutes)*60;
+                $formattedTime = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+                if ($i > 0) {
+                    $lon1 = $this->TrackPointArray[$i-1]["longitude"];
+                    $lat1 = $this->TrackPointArray[$i-1]["latitude"];
+                    $lon2 = $this->TrackPointArray[$i]["longitude"];
+                    $lat2 = $this->TrackPointArray[$i]["latitude"];
+                    $distance += $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
+                }
+                $arr['rows'][]['c'] = array(array('v' => $diff),array('v' => ''),array('v' => $distance),array('v' => $TrackPoint["longitude"].";".$TrackPoint["latitude"]));
+            }
+            
+            return json_encode($arr);
+        }
+        
+        function GetInclinationTable() {
+            $arr = array();
+            
+            $arr['cols'][] = array('label' => 'distance', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'annotation', 'type' => 'string');
+            $arr['cols'][] = array('label' => 'inclination', 'type' => 'number');
+            $arr['cols'][] = array('role' => 'tooltip', 'type' => 'string', 'p' => array('role' => 'tooltip'));
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $distance = 0;
+            $inclination = 0;
+            $num = $this->GetNumberOfTrackPoints();
+            for ($i = 0; $i < $num; $i++) {
+                if ($this->TrackPoint[$i]["elevation"] == -999) {continue;}
+                if ($i > 0) {
+                    $lon1 = $this->TrackPointArray[$i-1]["longitude"];
+                    $lat1 = $this->TrackPointArray[$i-1]["latitude"];
+                    $lon2 = $this->TrackPointArray[$i]["longitude"];
+                    $lat2 = $this->TrackPointArray[$i]["latitude"];
+                    $dx = $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
+                    $dy = $this->TrackPointArray[$i]["elevation"] - $this->TrackPointArray[$i-1]["elevation"];
+                    $distance += $dx;
+                    if ($dx > 0) {
+                        $inclination = 180/M_PI*atan($dy/($dx*1000));
+                    }
+                    else {$inclination = 0;}
+                }
+                $arr['rows'][]['c'] = array(array('v' => $distance),array('v' => ''),array('v' => $inclination),array('v' => $this->TrackPointArray[$i]["longitude"].";".$this->TrackPointArray[$i]["latitude"]));
             }
             
             return json_encode($arr);

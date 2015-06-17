@@ -293,5 +293,26 @@
             
             return $imageInfo;
         }
+        
+        function GetImageInfoForImage($fname) {
+            $query = "select * from images where filename='$fname'";
+            
+            $result = mysql_query($query);
+            
+            if ($row = mysql_fetch_assoc($result)) {
+                $imageInfo = array("date" => $row['date'], "latitude" => $row['latitude'], "longitude" => $row['longitude'], "elevation" => $row['elevation'], "comment" => $row['comment'], "filename" => $row['filename']);
+            }
+            else {$imageInfo = 0;}
+            
+            return $imageInfo;
+        }
+        
+        function InsertImageComment($image, $comment) {
+            $query = "update images set comment='$comment' where filename='$image'";
+            
+            $result = mysql_query($query);
+            
+            return $result;
+        }
     }
 ?>

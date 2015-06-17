@@ -119,6 +119,32 @@
             
             return $return;
         }
+        
+        function GetFormattedLongitude($lon) {
+            if ($lon < 0) {$EW = "W";}
+            else {$EW = "E";}
+            
+            $lon = abs($lon);
+            
+            $degree = floor($lon);
+            $minutes = floor(($lon - $degree)*60);
+            $seconds = round((($lon - $degree)*60 - $minutes)*60,1);
+            
+            return $degree."°".$minutes."'".$seconds."\" ".$EW;
+        }
+        
+        function GetFormattedLatitude($lat) {
+            if ($lat < 0) {$NS = "S";}
+            else {$NS = "N";}
+            
+            $lat = abs($lat);
+            
+            $degree = floor($lat);
+            $minutes = floor(($lat - $degree)*60);
+            $seconds = round((($lat - $degree)*60 - $minutes)*60,1);
+            
+            return $degree."°".$minutes."'".$seconds."\" ".$NS;
+        }
     }
     
 ?>

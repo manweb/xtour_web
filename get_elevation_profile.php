@@ -13,5 +13,7 @@
     
     if ($type == 1) {echo $parser->GetAltitudeTable();}
     if ($type == 2) {echo $parser->GetAltitudeTableVsDistance();}
+    if ($type == 3) {echo $parser->GetDistanceTable();}
+    if ($type == 4) {echo $parser->GetInclinationTable();}
     
 ?>

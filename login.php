@@ -9,7 +9,7 @@ echo "<input class='InputField' id='login_user' type='text' width='100' name='us
 echo "<input class='InputField' id='login_pwd' type='password' width='100' name='pwd' value='Passwort' style='color:#cbcbcb' onfocus=\"if(this.value=='Passwort') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Passwort', this.style.color='#cbcbcb';}\"><br><br>\n";
 echo "<input type='submit' value='Einloggen' class='InputButton'>\n";
 echo "</form>\n";
-echo "<a href='javascript:toggle_dim(300,400,\"register.php\")'>Registrieren</a>\n";
+echo "<a href='javascript:toggle_dim(300,300,\"register.php\")'>Registrieren</a>\n";
 echo "</td>\n";
 echo "</tr>\n";
 echo "</table>\n";

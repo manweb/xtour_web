@@ -209,18 +209,28 @@
             echo "</tr>\n";
             echo "</table>\n";
             echo "<p style='margin-top: 5px; margin-left: 5px; margin-right: 5px;'>\n";
-            if ($nImages < 3) {$n = $nImages;}
-            else {$n = 3;}
+            if ($nImages < 4) {$n = $nImages;}
+            elseif ($nImages > 4) {$n = 3;}
+            else {$n = 4;}
             if ($images) {
                 for ($i = 0; $i < $n; $i++) {
                     $img = $path.$images[$i];
                     $img2 = str_replace(".jpg","_thumb.jpg",$img);
                     if (!file_exists($img2)) {$imageEdit->GetSquareImage($img,200);}
+                    echo "<div class='NewsFeedImageContainer'>\n";
                     echo "<img src='".$img2."' width='45px' onmouseover='LoadMovingDiv(this)'; onmouseout='HideMovingDiv()';>\n";
+                    echo "</div>\n";
                 }
                 
-                if ($nImages > 3) {
-                    echo "<img src='getNumberImage.php?width=45&num=".($nImages - 3)."' width='45px'>\n";
+                if ($nImages > 4) {
+                    $img = $path.$images[4];
+                    $img2 = str_replace(".jpg","_thumb.jpg",$img);
+                    if (!file_exists($img2)) {$imageEdit->GetSquareImage($img,200);}
+                    echo "<div class='NewsFeedImageContainer'>\n";
+                    echo "<div class='NewsFeedImageBackground' style='background-image: url(\"".$img2."\")'></div>\n";
+                    echo "<div class='NewsFeedImage'><font color='white' size='4'>+".($nImages-3)."</font></div>\n";
+                    echo "</div>\n";
+                    //echo "<img src='getNumberImage.php?width=45&num=".($nImages - 3)."' width='45px'>\n";
                 }
             }
             echo "</p>\n";
@@ -251,7 +261,12 @@
             
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
             
-            $this->PrintCommentTextfield(450, 'images/profile_icon_grey.png', $tid);
+            if (isset($_COOKIE["userID"])) {
+                $img = "users/".$_COOKIE["userID"]."/profile.png";
+            }
+            else {$img = "images/profile_icon_grey.png";}
+            
+            $this->PrintCommentTextfield(450, $img, $tid);
             
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
             
@@ -569,7 +584,7 @@
                         $img2 = str_replace(".jpg","_thumb.jpg",$imgPath);
                         if (!file_exists($img2)) {$imageEdit->GetSquareImage($imgPath,200);}
                     
-                        echo "<a href='javascript:void(0)' onclick='toggle_dim(400, 400, \"http://www.xtour.ch/show_picture.php?tid=".$tid."&fname=".$img."\")'><img src='".$img2."' width='80'></a>\n";
+                        echo "<a href='javascript:void(0)' onclick='toggle_dim(533, 400, \"http://www.xtour.ch/show_picture.php?tid=".$tid."&fname=".$img."\")'><img src='".$img2."' width='80'></a>\n";
                     }
                     echo "</td>\n";
                 }
@@ -710,8 +725,6 @@
             echo "</tr>\n";
             echo "</table>\n";*/
             
-            $date = time();
-            
             /*echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td width='30' height='30' valign='top'><img src='".$img."' width='30'></td>\n";
@@ -725,9 +738,9 @@
             
             echo "<div class='comment_container_div'>\n";
             
-            echo "<div class='comment_img_div'><img src='".$img."' width='30'></div>\n";
+            echo "<div class='comment_img_div' style='background-image: url(\"".$img."\")'></div>\n";
             echo "<div class='comment_content_textfield_div'>\n";
-            echo "<textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(".$tid.",450,\"images/profile_icon_grey.png\",\"Name\",".$date.",this)'></textarea>";
+            echo "<textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(".$tid.",450,this)'></textarea>";
             echo "</div>\n";
             
             echo "</div>\n";
