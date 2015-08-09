@@ -46,6 +46,31 @@
         function GetNumImages() {
             return $this->nImages;
         }
+        
+        function CreateUserInfo($id, $firstName, $lastName) {
+            $currentDate = time();
+            
+            $userInfo = new DOMDocument("1.0", "UTF-8");
+            $userInfo->formatOutput = true;
+            
+            $xml = $userInfo->createElement("xml");
+            $userInfo->appendChild($xml);
+            
+            $userdata = $userInfo->createElement("userdata");
+            $xml->appendChild($userdata);
+            
+            $userID = $userInfo->createElement("userID",$id);
+            $userName = $userInfo->createElement("userName",$firstName." ".$lastName);
+            $dateJoined = $userInfo->createElement("dateJoined",$currentDate);
+            
+            $userdata->appendChild($userID);
+            $userdata->appendChild($userName);
+            $userdata->appendChild($dateJoined);
+            
+            $userInfo->save("users/".$id."/UserInfo.xml");
+            
+            return 1;
+        }
     }
     
 ?>

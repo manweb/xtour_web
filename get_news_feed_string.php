@@ -16,7 +16,7 @@
     while ($tour = $DB->NextTour()) {
         $img = "http://www.xtour.ch/users/".$tour["user_id"]."/profile.png";
         $userName = $DB->GetUserNameForID($tour["user_id"]);
-        $tour_info .= $tour["tour_id"].','.$tour["user_id"].','.$userName.','.$img.','.$tour["date"].','.$tour["total_time"].','.$tour["total_altitude"].','.$tour["total_distance"].','.$tour["total_descent"].','.$tour["lowest_point"].','.$tour["highest_point"].','.$tour["start_lat"].','.$tour["start_lon"].','.$tour["country"].','.$tour["province"].';';
+        $tour_info .= $tour["tour_id"].','.$tour["user_id"].','.$userName.','.$img.','.$tour["date"].','.$tour["total_time"].','.$tour["total_altitude"].','.$tour["total_distance"].','.$tour["total_descent"].','.$tour["lowest_point"].','.$tour["highest_point"].','.$tour["start_lat"].','.$tour["start_lon"].','.$tour["country"].','.$tour["province"].','.urlencode($tour["description"]).','.$tour["rating"].';';
     }
     
     echo $tour_info;

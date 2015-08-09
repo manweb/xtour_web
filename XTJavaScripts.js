@@ -61,10 +61,13 @@ function initialize(filename, tid) {
     
     var imageMarker, i;
     
+    var markerIcon = new google.maps.MarkerImage("http://www.xtour.ch/images/ski_pole_camera@3x.png",null,null,null,new google.maps.Size(20,40));
+    
     for (i = 0; i < imageMarkers.length; i++) {
         imageMarker = new google.maps.Marker({
                                         position: new google.maps.LatLng(imageMarkers[i][0], imageMarkers[i][1]),
-                                        map: map
+                                        map: map,
+                                        icon: markerIcon
                                         });
         
         google.maps.event.addListener(imageMarker, 'click', (function(marker,i) {
@@ -76,13 +79,13 @@ function initialize(filename, tid) {
     }
     
     var myLatlng = new google.maps.LatLng(46.770809,8.377733);
-    var markerIcon = {
+    var markerPositionIcon = {
     url: "http://www.xtour.ch/images/markerIcon.png",
     size: new google.maps.Size(16,16),
     origin: new google.maps.Point(0,0),
     anchor: new google.maps.Point(8,8)
     };
-    marker = new google.maps.Marker({position: myLatlng, map: map, title:"Picture info here", icon: markerIcon});
+    marker = new google.maps.Marker({position: myLatlng, map: map, title:"Picture info here", icon: markerPositionIcon});
 }
 
 function init() {
@@ -352,7 +355,7 @@ function toggle_dim(width, height, content) {
         div_dim.style.display = "block";
         div_box.style.display = "block";
         
-        document.getElementById('div_dim_content').innerHTML="<p align='center' style='padding-top: "+(height/2-20)+"px'><img src='http://www.xtour.ch/images/loading.gif' width='80'></p>";
+        document.getElementById('div_dim_content').innerHTML="<p align='center' style='padding-top: "+((height-22)/2-20)+"px; padding-bottom: "+((height-22)/2-20)+"px'><img src='http://www.xtour.ch/images/loading.gif' width='80'></p>";
         
         if (window.XMLHttpRequest)
         {// code for IE7+, Firefox, Chrome, Opera, Safari
@@ -403,8 +406,12 @@ function FileUploadSubmit() {
 }
 
 function HideLoading(file) {
+    if (!file) {file = "images/add_profile_picture.png";}
+    
     document.getElementById('div_loading').innerHTML = '';
     document.getElementById('file_upload_wrapper').style.backgroundImage = 'url('+file+')';
+    
+    if (file) {document.getElementById('input_image_filename').value = file;}
 }
 
 function ValidateLogin() {
@@ -451,6 +458,64 @@ function ValidateLogin() {
     xmlhttp.send();
 }
 
+function InsertNewUser() {
+    var firstName = document.getElementById('input_firstName');
+    var lastName = document.getElementById('input_lastName');
+    var email = document.getElementById('input_email');
+    var password = document.getElementById('input_password');
+    var profilePicture = document.getElementById('input_image_filename');
+    
+    var allOK = true;
+    
+    if (firstName.value == "Vorname") {firstName.style.borderColor = 'red'; allOK = false;}
+    if (lastName.value == "Nachname") {lastName.style.borderColor = 'red'; allOK = false;}
+    if (email.value == "E-Mail") {email.style.borderColor = 'red'; allOK = false;}
+    if (password.value == "Passwort") {password.style.borderColor = 'red'; allOK = false;}
+    
+    if (!allOK) {return 0;}
+    
+    var request = 'enter_new_user.php?firstName='+firstName.value+'&lastName='+lastName.value+'&email='+email.value+'&password='+password.value+'&profilePicture='+profilePicture.value;
+    
+    document.getElementById('div_dim_content').innerHTML = "Validating";
+    
+    if (window.XMLHttpRequest)
+    {// code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {// code for IE6, IE5
+        xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            var UID = xmlhttp.responseText.toString().toLowerCase();
+            if (UID != "false") {
+                //document.getElementById('div_dim_content').innerHTML = "Login successful!";
+                document.getElementById('div_dim_content').innerHTML = "<p align='center' style='margin-top: 20px; margin-bottom: 10px;'><img src='http://www.xtour.ch/users/" + UID + "/profile.png' width='80'></p><p align='center'><font style='font-family: helvetica; font-size: 14;'>Willkommen auf XTour " + firstName.value + "!</font></p>";
+                //document.getElementById('profile_picture').src = "users/" + UID + "/profile.png";
+                document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('users/" + UID + "/profile.png')";
+                document.querySelectorAll('.header_login_text')[0].innerHTML = "<font class='HeaderFont' size='12'><a class='header_link' href='javascript::void()' onclick='logout()'>Ausloggen</a></font>";
+                
+                var commentImg = document.querySelectorAll('.comment_img_div');
+                
+                for (var i = 0; i < commentImg.length; i++) {
+                    commentImg[i].style.backgroundImage = "url('users/"+UID+"/profile.png')";
+                }
+                
+                setCookie("userID",UID,7);
+                
+                //toggle_dim();
+            }
+            else {document.getElementById('div_dim_content').innerHTML = "Login failed!";}
+        }
+        else {document.getElementById('div_dim_content').innerHTML = "There was a problem verifying the user.";}
+    }
+    xmlhttp.open('GET',request,true);
+    xmlhttp.send();
+}
+
 function LoadMainDiv(content, tid, file) {
     document.getElementById('MainContent').innerHTML = "<p align='left' style='padding-left:210px; padding-top:50px'><img src='http://www.xtour.ch/images/loading.gif' width='80'></p>";
     
@@ -468,6 +533,26 @@ function LoadMainDiv(content, tid, file) {
         {
             document.getElementById('MainContent').innerHTML=xmlhttp.responseText;
             if (content.indexOf("tour_details.php") > -1 && tid) {initialize(file, tid); drawChart(tid);}
+        }
+    }
+    xmlhttp.open('GET',content,true);
+    xmlhttp.send();
+}
+
+function RunScript(content) {
+    if (window.XMLHttpRequest)
+    {// code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {// code for IE6, IE5
+        xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            var response = xmlhttp.responseText;
         }
     }
     xmlhttp.open('GET',content,true);
@@ -499,6 +584,7 @@ function ShowTourDetails(tid)
         
         if (el == 'textarea' || el == 'a') {return;}
         if (el == 'img' && (e.target.id == 'feedbox_close' || e.srcElement.id == 'feedbox_close')) {return;}
+        if (el == 'img' && (e.target.id == 'feedbox_hide' || e.srcElement.id == 'feedbox_hide')) {return;}
     }
     
     var content = "tour_details.php?tid=" + tid;
@@ -664,6 +750,8 @@ function MoveTabDiv(id, position)
         var e = "#"+elementID;
         $(e).fadeIn(600);
         var currentElement = document.getElementById(elementID);
+        
+        if (currentElement.style.visibility == "hidden") {currentElement.style.visibility = "visible";}
         //currentElement.style.visibility = "visible";
     }
     
@@ -699,10 +787,42 @@ function MoveGraphTabDiv(tid, id, position)
 
 function DeleteTour(tid)
 {
+    if (confirm(unescape("Bist du sicher, dass du die Tour l%F6schen willst?"))) {
+        RunScript("delete_tour.php?tid="+tid);
+        
+        var e = "#" + tid + "_div_feedbox";
+        $(e).fadeTo(800, 0, function() {
+                $(e).animate({height:'0'},300,'swing',function() {$(e).hide();});
+                });
+    }
+}
+
+function HideTour(tid)
+{
+    RunScript("hide_tour.php?tid="+tid);
+    
     var e = "#" + tid + "_div_feedbox";
     $(e).fadeTo(800, 0, function() {
                 $(e).animate({height:'0'},300,'swing',function() {$(e).hide();});
                 });
+}
+
+function FilterNewsFeed(id)
+{
+    switch (id) {
+    case 1:
+        LoadMainDiv("http://www.xtour.ch/news_feed.php");
+        break;
+        
+    case 2:
+        if (getCookie("userID") == "") {alert("Du musst dich zuerst einloggen um deine Touren anzuzeigen.");}
+        else {LoadMainDiv("http://www.xtour.ch/news_feed.php?userID="+getCookie("userID"));}
+        break;
+        
+    case 3:
+        LoadMainDiv("http://www.xtour.ch/news_feed.php?rating=1");
+        break;
+    }
 }
 
 function setCookie(cname, cvalue, exdays) {

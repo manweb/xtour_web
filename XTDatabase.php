@@ -46,6 +46,26 @@
             return 1;
         }
         
+        function InsertNewUser($id, $firstName, $lastName, $email, $password) {
+            $pwd_md5 = md5($password);
+            
+            $currentDate = time();
+            
+            $query = "insert into members (id, first_name, last_name, email, password, dateJoined) values ('$id', '$firstName', '$lastName', '$email', '$pwd_md5', '$currentDate')";
+            
+            $result = mysql_query($query);
+            
+            return $result;
+        }
+        
+        function GetNewUserID() {
+            $maxID = mysql_query("select max(id) from members");
+            $row = mysql_fetch_row($maxID);
+            $id = $row[0]+1;
+            
+            return $id;
+        }
+        
         function GetUserID($email) {
             $query = sprintf("select id from members where email='%s'", $email);
             
@@ -66,8 +86,8 @@
             return $name;
         }
         
-        function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $province) {
-            $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude, total_descent, lowest_point, highest_point, country, province) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude', '$descent', '$lowestPoint', '$highestPoint', '$country', '$province')";
+        function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating) {
+            $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude, total_descent, lowest_point, highest_point, country, province, description, rating) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude', '$descent', '$lowestPoint', '$highestPoint', '$country', '$province', '$description', '$rating')";
             
             $return = mysql_query($query);
             
@@ -115,11 +135,33 @@
         }
         
         function DeleteTour($tid) {
-            $query = "delete from tours where tour_id='$tid'";
+            $query1 = "delete from tours where tour_id='$tid'";
+            $query2 = "delete from comments where TID='$tid'";
+            $query3 = "delete from images where tour_id='$tid'";
+            
+            $allOK = 1;
+            
+            if (!mysql_query($query1)) {$allOK = 0;}
+            if (!mysql_query($query2)) {$allOK = 0;}
+            if (!mysql_query($query3)) {$allOK = 0;}
+            
+            return $allOK;
+        }
+        
+        function HideTour($tid) {
+            $query = "update tours set hidden=1 where tour_id='$tid'";
             
             $return = mysql_query($query);
             
-            return $result;
+            return $return;
+        }
+        
+        function ShowTour($tid) {
+            $query = "update tours set hidden=0 where tour_id='$tid'";
+            
+            $return = mysql_query($query);
+            
+            return $return;
         }
         
         function TourExists($tid) {
@@ -131,8 +173,10 @@
             else {return 1;}
         }
         
-        function LoadLatestTours($limit) {
-            $query = "select * from tours where sub_id='0' and tour_type='0' order by date desc limit $limit";
+        function LoadLatestTours($limit,$uid,$rating) {
+            if ($uid) {$query = "select * from tours where sub_id='0' and tour_type='0' and user_id='$uid' and hidden='0' order by date desc limit $limit";}
+            if ($rating) {$query = "select * from tours where sub_id='0' and tour_type='0' and rating > 0 and hidden='0' order by rating desc limit $limit";}
+            else {$query = "select * from tours where sub_id='0' and tour_type='0' and hidden='0' order by date desc limit $limit";}
             
             $result = mysql_query($query);
             if (!$result) {return 0;}
@@ -157,6 +201,8 @@
                 $arrTMP["highest_point"] = $row['highest_point'];
                 $arrTMP["country"] = $row['country'];
                 $arrTMP["province"] = $row['province'];
+                $arrTMP["description"] = $row['description'];
+                $arrTMP["rating"] = $row['rating'];
                 
                 array_push($this->TourArray, $arrTMP);
             }
@@ -217,7 +263,7 @@
             
             $row = mysql_fetch_assoc($result);
             
-            $info = array("date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country']);
+            $info = array("date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country'], "description" => $row['description'], "rating" => $row['rating']);
             
             return $info;
         }
@@ -254,12 +300,12 @@
             
             $info = array();
             
-            $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country']);
+            $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country'], "description" => $row['description'], "rating" => $row['rating']);
             
             array_push($info, $arrTMP);
             
             while ($row = mysql_fetch_assoc($result2)) {
-                $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country']);
+                $arrTMP = array("count" => $row['sub_id'], "type" => $row['tour_type'], "date" => $row['date'], "start" => $row['start_date'], "end" => $row['end_date'], "lat" => $row['start_lat'], "lon" => $row['start_lon'], "alt" => $row['start_alt'], "time" => $row['total_time'], "distance" => $row['total_distance'], "ascent" => $row['total_altitude'], "descent" => $row['total_descent'], "lowestPoint" => $row['lowest_point'], "highestPoint" => $row['highest_point'], "province" => $row['province'], "country" => $row['country'], "description" => $row['description'], "rating" => $row['rating']);
                 
                 array_push($info, $arrTMP);
             }
@@ -313,6 +359,31 @@
             $result = mysql_query($query);
             
             return $result;
+        }
+        
+        function InsertWarning($uid,$tid,$date,$longitude,$latitude,$elevation,$category,$comment) {
+            $username = $this->GetUserNameForID($uid);
+            
+            $query = "insert into warnings (user_id, tour_id, username, date, longitude, latitude, elevation, category, comment) values ('$uid', '$tid', '$username', '$date', '$longitude', '$latitude', '$elevation', '$category', '$comment')";
+            
+            $result = mysql_query($query);
+            
+            return $result;
+        }
+        
+        function GetWarnings($date) {
+            $query = "select * from warnings where date >= '$date'";
+            
+            $result = mysql_query($query);
+            
+            $warnings = array();
+            while ($row = mysql_fetch_assoc($result)) {
+                $arrTMP = array("userID" => $row['user_id'], "tourID" => $row['tour_id'], "username" => $row['username'], "date" => $row['date'], "longitude" => $row['longitude'], "latitude" => $row['latitude'], "elevation" => $row['elevation'], "category" => $row['category'], "comment" => $row['comment']);
+                
+                array_push($warnings, $arrTMP);
+            }
+            
+            return $warnings;
         }
     }
 ?>

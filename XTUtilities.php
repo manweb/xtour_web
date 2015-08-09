@@ -5,13 +5,13 @@
     class XTUtilities {
         
         var $countryList = array(
-                             "switzerland" => "map_ch2.png",
-                             "usa_california" => "map_us_ca.png",
-                             "usa_colorado" => "map_us_co.png");
+                             "Switzerland" => "map_ch2.png",
+                             "United States_California" => "map_us_ca.png",
+                             "United States_Colorado" => "map_us_co.png");
         var $countryRefCoordinates = array(
-                                       "switzerland" => array(5.96398, 10.492922, 47.8084, 45.818103),
-                                       "usa_california" => array(-128.56, -109.93, 42.0, 32.54),
-                                       "usa_colorado" => array(-109.540666667,-101.540666667,41,36.994));
+                                       "Switzerland" => array(5.96398, 10.492922, 47.8084, 45.818103),
+                                       "United States_California" => array(-128.56, -109.93, 42.0, 32.54),
+                                       "United States_Colorado" => array(-109.540666667,-101.540666667,41,36.994));
         
         function GetUserIDFromTour($tid) {
             return substr($tid, -4);
@@ -103,8 +103,21 @@
         
         function DeleteDirectoryForTour($tid) {
             $path = $this->GetTourPath($tid);
+            $imagePath = $this->GetTourImagePath($tid);
             
             $return = 1;
+            if (is_dir($imagePath)) {
+                $files = scandir($imagePath);
+                foreach ($files as $file) {
+                    if ($file != "." && $file != "..") {
+                        if (!unlink($imagePath."/".$file)) {$return = 0;}
+                    }
+                }
+                
+                reset($files);
+                rmdir($imagePath);
+            }
+            
             if (is_dir($path)) {
                 $files = scandir($path);
                 foreach ($files as $file) {

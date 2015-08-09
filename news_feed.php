@@ -3,17 +3,23 @@
     include_once('XTInfoBox.php');
     include_once('XTDatabase.php');
     
+    $userID = 0;
+    $rating = 0;
+    
+    if ($_GET['userID']) {$userID = $_GET['userID'];}
+    if ($_GET['rating']) {$rating = $_GET['rating'];}
+    
     $IB = new XTInfoBox();
     $DB = new XTDatabase();
     
     if (!$DB->Connect()) {echo "There was a problem connecting to the database.";}
     
-    $DB->LoadLatestTours(10);
+    $DB->LoadLatestTours(10,$userID,$rating);
     
     while ($tour = $DB->NextTour()) {
         $img = "users/".$tour["user_id"]."/profile.png";
         $userName = $DB->GetUserNameForID($tour["user_id"]);
-        $IB->PrintFeedBox2(500, $img, $userName, $tour["tour_id"], $tour["date"], $tour["total_time"], $tour["total_altitude"], $tour["total_distance"], $tour["start_lat"], $tour["start_lon"], $tour["country"], $tour["province"]);
+        $IB->PrintFeedBox2(500, $img, $userName, $tour["tour_id"], $tour["date"], $tour["total_time"], $tour["total_altitude"], $tour["total_distance"], $tour["start_lat"], $tour["start_lon"], $tour["country"], $tour["province"], $tour["description"]);
     }
     
     /*$cont = "<button id='GMaps' onclick='initialize()'>Google</button>".

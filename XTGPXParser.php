@@ -25,6 +25,8 @@
         var $highestPoint;
         var $country;
         var $province;
+        var $description;
+        var $rating;
         var $KML_doc;
         var $KML_document;
         var $KML_folder;
@@ -55,7 +57,9 @@
                 $this->lowestPoint = (double)$metadata_elements->LowestPoint;
                 $this->highestPoint = (double)$metadata_elements->HighestPoint;
                 $this->country = (string)$metadata_elements->Country;
-                $this->province = (string)$metadate_elements->Province;
+                $this->province = (string)$metadata_elements->Province;
+                $this->description = (string)$metadata_elements->Description;
+                $this->rating = (string)$metadata_elements->Rating;
             }
             
             // Get the track
@@ -188,6 +192,14 @@
         
         function GetProvince() {
             return $this->province;
+        }
+        
+        function GetDescription() {
+            return $this->description;
+        }
+        
+        function GetRating() {
+            return $this->rating;
         }
         
         function GetFirstCoordinate() {
@@ -486,6 +498,118 @@
             }
             
             return json_encode($arr);
+        }
+        
+        function GetAltitudeTableForPHP() {
+            $arr = array();
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $startTime = $this->GetStartTime();
+            $unixStartTime = strtotime($startTime);
+            
+            foreach ($this->TrackPointArray as $TrackPoint) {
+                if ($TrackPoint["elevation"] == -999) {continue;}
+                $time = strtotime($TrackPoint["time"]);
+                $diff = $time - $unixStartTime;
+                if ($diff < 0) {continue;}
+                $hours = floor($diff/3600);
+                $minutes = floor(($diff/3600 - $hours)*60);
+                $seconds = (($diff/3600 - $hours)*60 - $minutes)*60;
+                $formattedTime = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+                $arrTMP = array($diff, $TrackPoint["elevation"]);
+                
+                array_push($arr, $arrTMP);
+            }
+            
+            return $arr;
+        }
+        
+        function GetAltitudeTableVsDistanceForPHP() {
+            $arr = array();
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $distance = 0;
+            $num = $this->GetNumberOfTrackPoints();
+            for ($i = 0; $i < $num; $i++) {
+                if ($this->TrackPointArray[$i]["elevation"] == -999) {continue;}
+                if ($i > 0) {
+                    $lon1 = $this->TrackPointArray[$i-1]["longitude"];
+                    $lat1 = $this->TrackPointArray[$i-1]["latitude"];
+                    $lon2 = $this->TrackPointArray[$i]["longitude"];
+                    $lat2 = $this->TrackPointArray[$i]["latitude"];
+                    $distance += $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
+                }
+                $arrTMP = array($distance, $this->TrackPointArray[$i]["elevation"]);
+                
+                array_push($arr, $arrTMP);
+            }
+            
+            return $arr;
+        }
+        
+        function GetDistanceTableForPHP() {
+            $arr = array();
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $startTime = $this->GetStartTime();
+            $unixStartTime = strtotime($startTime);
+            
+            $distance = 0;
+            $num = $this->GetNumberOfTrackPoints();
+            for ($i = 0; $i < $num; $i++) {
+                $TrackPoint = $this->TrackPointArray[$i];
+                $time = strtotime($TrackPoint["time"]);
+                $diff = $time - $unixStartTime;
+                if ($diff < 0) {continue;}
+                $hours = floor($diff/3600);
+                $minutes = floor(($diff/3600 - $hours)*60);
+                $seconds = (($diff/3600 - $hours)*60 - $minutes)*60;
+                $formattedTime = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+                if ($i > 0) {
+                    $lon1 = $this->TrackPointArray[$i-1]["longitude"];
+                    $lat1 = $this->TrackPointArray[$i-1]["latitude"];
+                    $lon2 = $this->TrackPointArray[$i]["longitude"];
+                    $lat2 = $this->TrackPointArray[$i]["latitude"];
+                    $distance += $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
+                }
+                $arrTMP = array($diff, $distance);
+                
+                array_push($arr, $arrTMP);
+            }
+            
+            return $arr;
+        }
+        
+        function GetInclinationTableForPHP() {
+            $arr = array();
+            
+            if (!$this->TrackPointArray) {return 0;}
+            
+            $distance = 0;
+            $inclination = 0;
+            $num = $this->GetNumberOfTrackPoints();
+            for ($i = 0; $i < $num; $i++) {
+                if ($this->TrackPoint[$i]["elevation"] == -999) {continue;}
+                if ($i > 0) {
+                    $lon1 = $this->TrackPointArray[$i-1]["longitude"];
+                    $lat1 = $this->TrackPointArray[$i-1]["latitude"];
+                    $lon2 = $this->TrackPointArray[$i]["longitude"];
+                    $lat2 = $this->TrackPointArray[$i]["latitude"];
+                    $dx = $this->CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2);
+                    $dy = $this->TrackPointArray[$i]["elevation"] - $this->TrackPointArray[$i-1]["elevation"];
+                    $distance += $dx;
+                    if ($dx > 0) {
+                        $inclination = 180/M_PI*atan($dy/($dx*1000));
+                    }
+                    else {$inclination = 0;}
+                }
+                $arrTMP = array($distance, $inclination);
+            }
+            
+            return $arr;
         }
         
         function CalculateHaversineForPoints($lat1, $lon1, $lat2, $lon2) {

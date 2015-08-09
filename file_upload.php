@@ -42,6 +42,8 @@
         
         $result = move_uploaded_file($fileNameTMP, $path.$fileName);
         if (!$result) {return 0;}
+        
+        return 1;
     }
     
     function UploadGPX($fileNameTMP, $fileName, $user_id) {
@@ -94,6 +96,8 @@
         $highestPoint = $parser->GetHighestPoint();
         $country = $parser->GetCountry();
         $province = $parser->GetProvince();
+        $description = $parser->GetDescription();
+        $rating = $parser->GetRating();
         if (!strcmp($type, "up")) {$tour_type = 1;}
         elseif (!strcmp($type, "down")) {$tour_type = 2;}
         else {$tour_type = 0;}
@@ -101,7 +105,7 @@
         $db = new XTDatabase();
         
         if (!$db->Connect()) {return 0;}
-        $return = $db->InsertNewTour($tour_id, $count, $tour_type, $user_id, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $privince);
+        $return = $db->InsertNewTour($tour_id, $count, $tour_type, $user_id, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating);
         
         if (!$return) {return 0;}
         

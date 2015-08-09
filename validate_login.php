@@ -9,7 +9,7 @@
     
     if (!$DB->Connect()) {echo "false"; return 0;}
     
-    if (!$DB->VerifyUser($uid, md5($pwd))) {echo "false"; return 0;}
+    if (!$DB->VerifyUser($uid, $pwd)) {echo "false"; return 0;}
     
     $userID = $DB->GetUserID($uid);
     

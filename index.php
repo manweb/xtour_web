@@ -37,7 +37,7 @@ window.onpopstate = function(event) {
 <div class="div_overlay", id="div_dim"></div>
 <div class="div_overlay_box", id="div_box">
     
-    <p align='right' style='margin-bottom: 2px'><img src='http://www.xtour.ch/images/div_box_quit.png' width='20' onclick='toggle_dim()'></p>
+    <p align='right' style='margin-bottom: 2px; margin-top: 0px; padding-bottom: 0px; padding-top:0px'><img src='http://www.xtour.ch/images/div_box_quit.png' width='20' onclick='toggle_dim()'></p>
 
 <div class="div_overlay_content", id="div_dim_content"></div>
 
@@ -89,16 +89,11 @@ window.onpopstate = function(event) {
 
 <table width='1000' align='left' border='0' cellpadding='0' cellspacing='0'>
     <tr>
-        <td width='300' align='left' valign='top'>
+        <td width='250' align='left' valign='top' style='padding-left: 10px'>
 <?php
-    if (!$DB->Connect()) {echo "Could not connect to database.<br>";}
-    else {echo "Established connection to database<br>";}
-    
-    if (!$DB->VerifyUser("weber_manuel@hotmail.com", md5("password"))) {echo "User doesn't exist!<br>";}
-    
-    $IB->PrintBoxWithContent2("Info here", 300); ?>
+    $IB->PrintBoxWithContent2("<p style='margin-top:5px; margin-bottom:5px; margin-left:5px; margin-right:5px;'><font style='font-family:Helvetica; font-size:14;'>iPhone App bald im App-Store erh&auml;ltlich.</font></p><p align='center' style='margin-top:0px; margin-bottom:0px;'><img src='images/iPhone_App_small.jpg' width='230'></p>", 240); ?>
         </td>
-        <td width='700' align='left' valign='top' style='padding-left: 20px'>
+        <td width='550' align='left' valign='top' style='padding-left: 20px'>
 
 <div id="MainContent">
 
@@ -111,6 +106,11 @@ window.onpopstate = function(event) {
 
 </div>
 
+        </td>
+        <td width='200' align='left' valign='top' style='padding-left: 10px'>
+<?php
+    $IB->PrintBoxWithContent2("Filter:<br><br><input type='radio' name='tourFilter' value='newest' checked='checked' onclick='FilterNewsFeed(1)'> Neueste Touren<br><input type='radio' name='tourFilter' value='myTours' onclick='FilterNewsFeed(2)'> Meine Touren<br><input type='radio' name='tourFilter' value='highestRating' onclick='FilterNewsFeed(3)'> Am besten bewertet<br>",200);
+?>
         </td>
     </tr>
 </table>

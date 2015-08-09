@@ -142,7 +142,7 @@
             echo "</table>\n";
         }
         
-        function PrintFeedBox2($width, $img, $name, $tid, $date, $time, $altitude, $distance, $lat, $lon, $country, $province)
+        function PrintFeedBox2($width, $img, $name, $tid, $date, $time, $altitude, $distance, $lat, $lon, $country, $province, $description)
         {
             $uid = 1000;
             $imageEdit = new XTImageEdit();
@@ -177,12 +177,15 @@
             echo "<div class='feedbox_div' id='".$tid."_div_feedbox' style='width: ".$width."' onclick='ShowTourDetails(\"$tid\")'>\n";
             echo "<table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
-            echo "<td width='80%' align='left' valign='top' style='padding-top: 2px; padding-left: 10px;'>\n";
+            echo "<td width='80%' align='left' valign='top' style='height: 17px; padding-top: 2px; padding-left: 10px;'>\n";
             echo "<font class='CommentHeaderFont'>".$name." am ".$day.", ".$date2."</font>\n";
             echo "</td>\n";
-            echo "<td width='20%' align='right' valign='top' style='padding-top: 2px; padding-right: 10px;'>\n";
-            echo "<img id='feedbox_hide' src='http://www.xtour.ch/images/hide_icon.png' width='15' onmouseover='this.src=\"http://www.xtour.ch/images/hide_icon_selected.png\"' onmouseout='this.src=\"http://www.xtour.ch/images/hide_icon.png\"' onclick=''>";
+            echo "<td width='20%' align='right' valign='top' style='height: 17px; padding-top: 2px; padding-right: 10px;'>\n";
+            
+            if ($uid == $_COOKIE['userID']) {
+            echo "<img id='feedbox_hide' src='http://www.xtour.ch/images/hide_icon.png' width='15' onmouseover='this.src=\"http://www.xtour.ch/images/hide_icon_selected.png\"' onmouseout='this.src=\"http://www.xtour.ch/images/hide_icon.png\"' onclick='HideTour(".$tid.")'>";
             echo "<img id='feedbox_close' src='http://www.xtour.ch/images/close_icon.png' width='15' onmouseover='this.src=\"http://www.xtour.ch/images/close_icon_selected.png\"' onmouseout='this.src=\"http://www.xtour.ch/images/close_icon.png\"' onclick='DeleteTour(".$tid.")'>";
+            }
             echo "</td>\n";
             echo "</tr>\n";
             echo "</table>\n";
@@ -240,6 +243,10 @@
             echo "</td>\n";
             echo "</tr>\n";
             echo "</table>\n";
+            
+            if ($description != "") {
+                echo "<div class='div_tour_description' style='width: 425px;'><font class='TourDescriptionFont'>".$description."</font></div>";
+            }
             
             echo "<div id='".$tid."_div_comment' style='position: relative;'>\n";
             
@@ -308,8 +315,12 @@
                 if ($currentTour['type'] == 1) {$title = "Aufstieg #".$currentTour['count'];}
                 if ($currentTour['type'] == 2) {$title = "Abfahrt #".$currentTour['count'];}
                 
+                if ($nSections == 2 && $i == 1) {$title = "";}
+                
                 echo "<div style='position:absolute; top: 40px; left: ".$offset."px; padding-left: 5px; padding-top: 5px; width: ".($sectionWidth-5)."px; height: 17px; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #dbdbdb;' onclick='MoveTabDiv(".$i.",".$offset.")'><a href='javascript:void(0)'><font class='TimeLineFont'>".$title."</font></a></div>\n";
             }
+            
+            if ($nSections == 2) {$nSections = 1;}
             
             echo "<div class='tab_div' id='TabDiv' style='position:absolute; top: 37px; left: 10px; width: ".$sectionWidth."px; height: 22px; border-top-style: solid; border-left-style: solid; border-right-style: solid; border-bottom-style: solid; border-top-width: 3px; border-left-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-top-color: #468ec8; border-left-color: #dbdbdb; border-right-color: #dbdbdb; border-bottom-color: #ffffff;'></div>\n";
             
@@ -325,7 +336,10 @@
                     echo "<font class='TimeLineFontDetailHeader'>".$sections[$i*4+$k]."</font><br>\n";
                     echo "<div class='timeline_value_div_box'>\n";
                     for ($n = 0; $n < $nSections; $n++) {
-                        echo "<div class='timeline_value_div' id='timeline_value_div".($i*4+$k).$n."' style='visibility: visible'>";
+                        if ($n == 0) {$visibility = "visible";}
+                        else {$visibility = "hidden";}
+                        
+                        echo "<div class='timeline_value_div' id='timeline_value_div".($i*4+$k).$n."' style='visibility: ".$visibility."'>";
                         echo "<font class='TimeLineFontDetail'>\n";
                         $unit = $UnitsArray[$i*4+$k];
                         if ($i == 0 && $k == 0) {echo $utilities->GetFormattedTimeFromSeconds($info[$n]["time"]);}
@@ -686,13 +700,15 @@
             
             echo "<div class='comment_container_div'>\n";
             
-            echo "<div class='comment_img_div'><img src='".$img."' width='30'></div>\n";
+            echo "<div class='comment_img_div2'><img src='".$img."' width='30'></div>\n";
+            echo "<div class='comment_edit_icons'><img src='http://www.xtour.ch/images/edit_icon.png' width='10'><img src='http://www.xtour.ch/images/close_icon.png' width='10'></div>\n";
             echo "<div class='comment_header_div'><font class='CommentHeaderFont'>".$name." am ".date("d.m.Y h:i:s", $date)."</font></div>\n";
             echo "<div class='comment_content_div'>\n";
             echo "<font class='CommentFont'>".$comment."</font>";
             echo "</div>\n";
             
             echo "</div>\n";
+            echo "<p style='margin-top: 0px; margin-bottom: 5px;'></p>\n";
             
         }
         
