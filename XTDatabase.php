@@ -2,6 +2,8 @@
     
     // Class which handles all database requests.
     
+    include_once('XTUtilities.php');
+    
     class XTDatabase {
         var $mysql_resource;
         private $db_name;
@@ -51,7 +53,7 @@
             
             $currentDate = time();
             
-            $query = "insert into members (id, first_name, last_name, email, password, dateJoined) values ('$id', '$firstName', '$lastName', '$email', '$pwd_md5', '$currentDate')";
+            $query = "insert into members (id, first_name, last_name, email, password, dateJoined, betaTester) values ('$id', '$firstName', '$lastName', '$email', '$pwd_md5', '$currentDate', '1')";
             
             $result = mysql_query($query);
             
@@ -86,8 +88,8 @@
             return $name;
         }
         
-        function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating) {
-            $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude, total_descent, lowest_point, highest_point, country, province, description, rating) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude', '$descent', '$lowestPoint', '$highestPoint', '$country', '$province', '$description', '$rating')";
+        function InsertNewTour($tid, $subid, $type, $uid, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $average_altitude, $cumulative_altitude, $average_descent, $cumulative_descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating, $anonymousTracking, $lowBatteryLevel) {
+            $query = "insert into tours (tour_id, sub_id, tour_type, user_id, date, start_date, end_date, start_lat, start_lon, start_alt, total_time, total_distance, total_altitude, total_descent, total_average_altitude, total_cumulative_altitude, total_average_descent, total_cumulative_descent, lowest_point, highest_point, country, province, description, rating, hidden, lowBatteryLevel) values ('$tid', '$subid', '$type', '$uid', '$date', '$startDate', '$endDate', '$lat', '$lon', '$alt', '$time', '$distance', '$altitude', '$descent', '$average_altitude', '$cumulative_altitude', '$average_descent', '$cumulative_descent', '$lowestPoint', '$highestPoint', '$country', '$province', '$description', '$rating', '$anonymousTracking', '$lowBatteryLevel')";
             
             $return = mysql_query($query);
             
@@ -126,8 +128,54 @@
             return $return;
         }
         
+        function UpdateTourLocation($tid) {
+            $query = "select * from tours where tour_id='$tid' && tour_type='0'";
+            
+            $result = mysql_query($query);
+            $row = mysql_fetch_assoc($result);
+            
+            if (!$result) {return 0;}
+            if (mysql_num_rows($result) != 1) {return 0;}
+            
+            $lon = $row['start_lon'];
+            $lat = $row['start_lat'];
+            
+            $utilities = new XTUtilities();
+            
+            $location = $utilities->ReverseGeocodeCoordinate($lat,$lon);
+            
+            if (!$location["province"] || !$location["country"]) {return 0;}
+            
+            $province = $location["province"];
+            $country = $location["country"];
+            
+            $query = "update tours set province='$province', country='$country' where tour_id='$tid' and tour_type='0'";
+            
+            $result = mysql_query($query);
+            
+            if (!$result) {return 0;}
+            
+            return 1;
+        }
+        
         function InsertNewImage($tour_id, $user_id, $filename, $longitude, $latitude, $elevation, $comment, $date) {
             $query = "insert into images (tour_id, user_id, filename, longitude, latitude, elevation, comment, date) values ('$tour_id', '$user_id', '$filename', '$longitude', '$latitude', '$elevation', '$comment', '$date')";
+            
+            $return = mysql_query($query);
+            
+            return $return;
+        }
+        
+        function InsertComment($tid, $uid, $name, $comment, $date) {
+            $query = "insert into comments (UID, TID, name, date, comment) values ('$uid', '$tid', '$name', '$date', '$comment')";
+            
+            $return = mysql_query($query);
+            
+            return $return;
+        }
+        
+        function UpdateComment($id, $comment, $date) {
+            $query = "update comments set comment='$comment', date='$date' where ID='$id'";
             
             $return = mysql_query($query);
             
@@ -176,7 +224,7 @@
         function LoadLatestTours($limit,$uid,$rating) {
             if ($uid) {$query = "select * from tours where sub_id='0' and tour_type='0' and user_id='$uid' and hidden='0' order by date desc limit $limit";}
             if ($rating) {$query = "select * from tours where sub_id='0' and tour_type='0' and rating > 0 and hidden='0' order by rating desc limit $limit";}
-            else {$query = "select * from tours where sub_id='0' and tour_type='0' and hidden='0' order by date desc limit $limit";}
+            if (!$uid && !$rating) {$query = "select * from tours where sub_id='0' and tour_type='0' and hidden='0' order by date desc limit $limit";}
             
             $result = mysql_query($query);
             if (!$result) {return 0;}
@@ -232,6 +280,7 @@
             
             while ($row = mysql_fetch_assoc($result)) {
                 $arrTMP = array();
+                $arrTMP["ID"] = $row['ID'];
                 $arrTMP["UID"] = $row['UID'];
                 $arrTMP["name"] = $row['name'];
                 $arrTMP["date"] = $row['date'];
@@ -253,6 +302,14 @@
             $this->CommentID++;
             
             return $arr;
+        }
+        
+        function GetNumberOfComments($tid) {
+            $query = "select * from comments where TID='$tid'";
+            
+            $result = mysql_query($query);
+            
+            return mysql_num_rows($result);
         }
         
         function GetTourSumInfo($tid) {
@@ -313,6 +370,61 @@
             return $info;
         }
         
+        function GetMonthlyUserStatistics($uid) {
+            $currentDate = date("Y-m");
+            $currentDate .= "-01 00:00:01";
+            
+            $timeOfCurrentMonth = strtotime($currentDate);
+            
+            return $this->GetUserStatistics($uid,$timeOfCurrentMonth);
+        }
+        
+        function GetSeasonalUserStatistics($uid) {
+            $currentYear = date("Y");
+            $currentMonth = date("m");
+            
+            if ($currentMonth > 0 && $currentMonth < 10) {$currentYear = date("Y",strtotime("-1 year"));}
+            
+            $currentDate = $currentYear."-10-01 00:00:01";
+            
+            $t = strtotime($currentDate);
+            
+            return $this->GetUserStatistics($uid,$t);
+        }
+        
+        function GetTotalUserStatistics($uid) {
+            return $this->GetUserStatistics($uid,strtotime("2015-01-01 00:00:01"));
+        }
+        
+        function GetUserStatistics($uid,$t) {
+            $query = "select * from tours where tour_type='0' and user_id='$uid' and date > $t";
+            
+            $result = mysql_query($query);
+            
+            $numberOfTours = mysql_num_rows($result);
+            $sumTime = 0;
+            $sumDistance = 0;
+            $sumAltitude = 0;
+            
+            if (!$numberOfTours) {$numberOfTours = 0;}
+            
+            while ($row = mysql_fetch_assoc($result)) {
+                $sumTime += $row['total_time'];
+                $sumDistance += $row['total_distance'];
+                $sumAltitude += $row['total_altitude'];
+            }
+            
+            return array("numberOfTours" => $numberOfTours, "sumTime" => $sumTime, "sumDistance" => $sumDistance, "sumAltitude" => $sumAltitude);
+        }
+        
+        function GetNumberOfToursInTimeInterval($uid,$start,$end) {
+            $query = "select * from tours where tour_type='0' and user_id='$uid' and date > $start and date <= $end";
+            
+            $result = mysql_query($query);
+            
+            return mysql_num_rows($result);
+        }
+        
         function GetUserIDForTour($tid) {
             $query = "select user_id from tours where tour_id='$tid' and tour_type='0'";
             
@@ -332,7 +444,7 @@
             $imageInfo = array();
             
             while ($row = mysql_fetch_assoc($result)) {
-                $arrTMP = array("date" => $row['date'], "latitude" => $row['latitude'], "longitude" => $row['longitude'], "elevation" => $row['elevation'], "comment" => $row['comment'], "filename" => $row['filename']);
+                $arrTMP = array("userID" => $row['user_id'], "tourID" => $row['tour_id'], "date" => $row['date'], "latitude" => $row['latitude'], "longitude" => $row['longitude'], "elevation" => $row['elevation'], "comment" => $row['comment'], "filename" => $row['filename']);
                 
                 array_push($imageInfo, $arrTMP);
             }
@@ -351,6 +463,14 @@
             else {$imageInfo = 0;}
             
             return $imageInfo;
+        }
+        
+        function GetNumberOfImagesForTour($tid) {
+            $query = "select * from images where tour_id='$tid'";
+            
+            $result = mysql_query($query);
+            
+            return mysql_num_rows($result);
         }
         
         function InsertImageComment($image, $comment) {

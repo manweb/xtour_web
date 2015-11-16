@@ -40,7 +40,7 @@ function initialize(filename, tid) {
     document.getElementById("map-canvas").innerHTML = "";
     
     var mapOptions = {
-    center: new google.maps.LatLng(46.770809, 8.377733), zoom: 7
+    center: new google.maps.LatLng(46.770809, 8.377733), zoom: 7, mapTypeId: google.maps.MapTypeId.TERRAIN
     };
     map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     
@@ -249,7 +249,7 @@ function drawChart(tid) {
                                                           // create mousemove event listener in the chart's container
                                                           // I use jQuery, but you can use whatever works best for you
                                                           $(container).mousemove(function (e) {
-                                                                                 var xPos = e.pageX - container.offsetLeft - 320;
+                                                                                 var xPos = e.pageX - container.offsetLeft - 276;
                                                                                  var yPos = e.pageY - container.offsetTop - 800;
                                                                                  var cli = chart.getChartLayoutInterface();
                                                                                  var xBounds = cli.getBoundingBox('hAxis#0#gridline');
@@ -446,6 +446,21 @@ function ValidateLogin() {
                     commentImg[i].style.backgroundImage = "url('users/"+UID+"/profile.png')";
                 }
                 
+                var deleteIcons = document.querySelectorAll('.delete_icon_div');
+                
+                for (var i = 0; i < deleteIcons.length; i++) {
+                    var ID = deleteIcons[i].id;
+                    var userID = ID.substring(ID.length,ID.length-4);
+                    
+                    if (UID == userID) {deleteIcons[i].style.display = "block";}
+                }
+                
+                var editIcons = document.querySelectorAll('.comment_edit_icons');
+                
+                for (var i = 0; i < editIcons.length; i++) {
+                    editIcons[i].style.display = "block";
+                }
+                
                 setCookie("userID",UID,7);
                 
                 toggle_dim();
@@ -468,9 +483,15 @@ function InsertNewUser() {
     var allOK = true;
     
     if (firstName.value == "Vorname") {firstName.style.borderColor = 'red'; allOK = false;}
+    else {firstName.style.borderColor = '#C9C9C9';}
     if (lastName.value == "Nachname") {lastName.style.borderColor = 'red'; allOK = false;}
+    else {lastName.style.borderColor = '#C9C9C9';}
     if (email.value == "E-Mail") {email.style.borderColor = 'red'; allOK = false;}
+    else {email.style.borderColor = '#C9C9C9';}
     if (password.value == "Passwort") {password.style.borderColor = 'red'; allOK = false;}
+    else {password.style.borderColor = '#C9C9C9';}
+    if (!profilePicture.value) {document.getElementById('div_loading').innerHTML = "<font style='font-family: helvetica; font-size: 12px; color: #ff0000;'>W&auml;hle noch ein Profilbild</font>"; allOK = false;}
+    else {document.getElementById('div_loading').innerHTML = "";}
     
     if (!allOK) {return 0;}
     
@@ -574,18 +595,15 @@ function AddHistoryEntry(path)
     history.pushState(stateObj, "new page", path);
 }
 
-function ShowTourDetails(tid)
+function ShowTourDetails(e, tid)
 {
-    if (window.event) {
-        var e = window.event;
-        var el;
-        if (e.target) {el = e.target.nodeName.toLowerCase();}
-        else if (e.srcElement) {el = e.srcElement.nodeName.toLowerCase();}
-        
-        if (el == 'textarea' || el == 'a') {return;}
-        if (el == 'img' && (e.target.id == 'feedbox_close' || e.srcElement.id == 'feedbox_close')) {return;}
-        if (el == 'img' && (e.target.id == 'feedbox_hide' || e.srcElement.id == 'feedbox_hide')) {return;}
-    }
+    var el;
+    if (e.target) {el = e.target.nodeName.toLowerCase();}
+    else if (e.srcElement) {el = e.srcElement.nodeName.toLowerCase();}
+    
+    if (el == 'textarea' || el == 'a') {return;}
+    if (el == 'img' && (e.target.id == 'feedbox_close' || e.srcElement.id == 'feedbox_close')) {return;}
+    if (el == 'img' && (e.target.id == 'feedbox_hide' || e.srcElement.id == 'feedbox_hide')) {return;}
     
     var content = "tour_details.php?tid=" + tid;
     var hist = "/tours/" + tid;
@@ -598,6 +616,8 @@ function ShowTourDetails(tid)
            success:function (data) {tourFiles = data;}
            }).responseText;
     
+    window.scrollTo(0,0);
+    
     LoadMainDiv(content,tid,tourFiles);
     AddHistoryEntry(hist);
 }
@@ -609,9 +629,9 @@ function textarea_resize(t) {
     t.style.height = (t.scrollHeight  + offset ) + 'px';
 }
 
-function captureEnter(tid, width, comment)
+function captureEnter(event, tid, width, comment)
 {
-    if (window.event.keyCode == 13 && window.event.shiftKey) {
+    if (event.keyCode == 13 && event.shiftKey) {
         var d = new Date();
         var day = d.getDate();
         if (day < 10) {day = "0" + day;}
@@ -685,6 +705,27 @@ function MoveMovingDiv()
 function HideMovingDiv()
 {
     document.getElementById('div_moving').style.visibility = 'hidden';
+}
+
+function ShowInfoDiv(e, content)
+{
+    var d = document.getElementById('div_info_container');
+    var d_content = document.getElementById('div_info');
+    
+    d_content.innerHTML = "<p align='center' style='margin-top: 0px; margin-bottom: 0px; padding-top: 3px; padding-bottom: 0px;'><font style='font-family: helvetica; font-size: 12; color: #000000;'>"+content+"</font></p>";
+    
+    var rect = e.getBoundingClientRect();
+    var posX = rect.left;
+    var posY = rect.bottom;
+    var dX = rect.right - rect.left;
+    d.style.visibility = 'visible';
+    d.style.left = (posX + dX/2 - 40) + 'px';
+    d.style.top = posY + 'px';
+}
+
+function HideInfoDiv()
+{
+    document.getElementById('div_info_container').style.visibility = 'hidden';
 }
 
 function HighlightTimelineItem(element,oldSize,newSize)
@@ -807,6 +848,15 @@ function HideTour(tid)
                 });
 }
 
+function ShowFullDescription()
+{
+    var e = document.getElementById('div_tour_description_detail');
+    
+    e.style.display = "inline-block";
+    e.style.height = "100%";
+    e.style.overflow = "visible";
+}
+
 function FilterNewsFeed(id)
 {
     switch (id) {
@@ -823,6 +873,66 @@ function FilterNewsFeed(id)
         LoadMainDiv("http://www.xtour.ch/news_feed.php?rating=1");
         break;
     }
+}
+
+function ShowImageDetail(e, id, column, image, imgDate, lat, lon, elevation, comment, width)
+{
+    var imageDiv = document.getElementById("imageView_"+id);
+    
+    var imageDivContent = imageDiv.innerHTML;
+    if (imageDivContent.search(image) > 0) {imageDiv.innerHTML = ""; imageDiv.style.display = "none"; return;}
+    
+    imageDiv.innerHTML = "<div class='image_detail_div_overlay' id='imageViewDetail_"+id+"' style='width: "+(width-18)+"px'><div style='position: absolute;'><img src='http://www.xtour.ch/images/compass_icon_white.png' width='50'></div><div style='position: absolute; margin-left: 55px;'><font class='ImageDetailDescriptionFont'>"+lat+"<br>"+lon+"</font></div><div style='position: absolute; margin-left: 5px; bottom: 5px; width: "+(width-30)+"px; height: 80px'><font class='ImageDetailDescriptionFont' style='font-size: 12'>"+comment+"</font></div></div><img src='"+image+"' width="+(width-2)+" style='border-style: solid; border-width: 1px; border-color: #000000'>";
+    
+    imageDiv.style.display = "inline-block";
+    
+    var rect = e.getBoundingClientRect();
+    var posX = rect.left;
+    var posY = rect.bottom;
+    var dX = rect.right - rect.left;
+    var xOffset = dX/2+parseInt(column)*parseInt(width)/4;
+    
+    imageDiv.style.backgroundPosition = 0.8*xOffset+"px 0px";
+}
+
+function ShowImageDetailDescription(e)
+{
+    var element = document.getElementById(e);
+    element.style.display = "inline-block";
+}
+
+function HideImageDetailDescription(e)
+{
+    var element = document.getElementById(e);
+    element.style.display = "none";
+}
+
+function GetFormattedLatitude(lat)
+{
+    var degrees = floor(lat);
+    var minutes = floor((lat-degrees)*60);
+    var seconds = round(((lat-degrees)*60-minutes)*60);
+    
+    var NS = "N";
+    if (lat < 0) {NS = "S";}
+    
+    var formattedLat = degrees+"°"+minutes+"\""+seconds+"\"\""+NS;
+    
+    return formattedLat;
+}
+
+function GetFormattedLongitude(lon)
+{
+    var degrees = floor(lon);
+    var minutes = floor((lon-degrees)*60);
+    var seconds = round(((lon-degrees)*60-minutes)*60);
+    
+    var EW = "E";
+    if (lon < 0) {EW = "W";}
+    
+    var formattedLon = degrees+"°"+minutes+"\""+seconds+"\"\""+EW;
+    
+    return formattedLon;
 }
 
 function setCookie(cname, cvalue, exdays) {
@@ -851,6 +961,18 @@ function logout() {
     
     for (var i = 0; i < commentImg.length; i++) {
         commentImg[i].style.backgroundImage = "url('images/profile_icon_grey.png')";
+    }
+    
+    var deleteIcons = document.querySelectorAll('.delete_icon_div');
+    
+    for (var i = 0; i < deleteIcons.length; i++) {
+        deleteIcons[i].style.display = "none";
+    }
+    
+    var editIcons = document.querySelectorAll('.comment_edit_icons');
+    
+    for (var i = 0; i < editIcons.length; i++) {
+        editIcons[i].style.display = "none";
     }
     
     document.cookie = "userID=; expires=Thu, 01 Jan 1970 00:00:00 UTC";

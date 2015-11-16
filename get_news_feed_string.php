@@ -6,11 +6,14 @@
     $num_tours = $_GET['num'];
     if (!$num_tours) {$num_tours = 10;}
     
+    $uid = $_GET['uid'];
+    $filter = $_GET['filter'];
+    
     $DB = new XTDatabase();
     
     if (!$DB->Connect()) {echo "There was a problem connecting to the database.";}
     
-    $DB->LoadLatestTours($num_tours);
+    $DB->LoadLatestTours($num_tours,$uid,$filter);
     
     $tour_info = '';
     while ($tour = $DB->NextTour()) {

@@ -18,8 +18,10 @@
     if (!strcmp($ext, "gpx") || !strcmp($ext, "GPX")) {$return = UploadGPX($fileNameTMP, $fileName, $user_id);}
     if (!strcmp($ext, "xml") || !strcmp($ext, "XML")) {$return = UploadXML($fileNameTMP, $fileName, $user_id);}
     
-    if ($return) {echo "true";}
-    else {echo "false";}
+    echo $return;
+    
+    //if ($return) {echo $fileName;}
+    //else {echo "false";}
     
     return;
     
@@ -27,7 +29,7 @@
         $regex = '/^(20[0-9]{2}[0,1][0-9][0-3][0-9][0-2][0-9][0-5][0-9][0-5][0-9][0-9]{4})_([0-9]{3})/';
         preg_match($regex, $fileName, $matches);
         
-        if (sizeof($matches) != 3) {return 0;}
+        if (sizeof($matches) != 3) {return "Error: inconsistent filename";}
         $tour_id = $matches[1];
         $count = $matches[2];
         
@@ -38,37 +40,37 @@
         }
         
         $path = "users/".$user_id."/tours/".$tour_id."/images/";
-        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return 0;}}
+        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return "Error: Could not create tour directory";}}
         
         $result = move_uploaded_file($fileNameTMP, $path.$fileName);
-        if (!$result) {return 0;}
+        if (!$result) {return "Error: Copying the file failed";}
         
-        return 1;
+        return $fileName;
     }
     
     function UploadGPX($fileNameTMP, $fileName, $user_id) {
         $regex = '/^(20[0-9]{2}[0,1][0-9][0-3][0-9][0-2][0-9][0-5][0-9][0-5][0-9][0-9]{4})_(up|down|sum)([0-9]+)/';
         preg_match($regex, $fileName, $matches);
         
-        if (sizeof($matches) != 4) {return 0;}
+        if (sizeof($matches) != 4) {return "Error: inconsistent filename";}
         $tour_id = $matches[1];
         $type = $matches[2];
         $count = $matches[3];
         
+        $utilities = new XTUtilities();
+        
         if (!$user_id) {
-            $utilities = new XTUtilities();
-            
             $user_id = $utilities->GetUserIDFromTour($tour_id);
         }
         
         $path = "users/".$user_id."/tours/".$tour_id."/";
-        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return 0;}}
+        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return "Error: Could not create tour directory";}}
         
         $result = move_uploaded_file($fileNameTMP, $path.$fileName);
-        if (!$result) {return 0;}
+        if (!$result) {return "Error: Copying the file failed";}
         
         $file = $path.$fileName;
-        if (!file_exists($file)) {return 0;}
+        if (!file_exists($file)) {return "Error: File does not exist";}
         
         $parser = new XTGPXParser();
         
@@ -92,31 +94,46 @@
         $distance = $parser->GetTotalDistance();
         $altitude = $parser->GetTotalAltitude();
         $descent = $parser->GetTotalDescent();
+        $average_altitude = $parser->GetTotalAverageAltitude();
+        $cumulative_altitude = $parser->GetTotalCumulativeAltitude();
+        $average_descent = $parser->GetTotalAverageDescent();
+        $cumulative_descent = $parser->GetTotalCumulativeDescent();
         $lowestPoint = $parser->GetLowestPoint();
         $highestPoint = $parser->GetHighestPoint();
         $country = $parser->GetCountry();
         $province = $parser->GetProvince();
         $description = $parser->GetDescription();
         $rating = $parser->GetRating();
+        $anonymousTracking = $parser->GetAnonymousTracking();
+        $lowBatterLevel = $parser->GetLowBatteryLevel();
         if (!strcmp($type, "up")) {$tour_type = 1;}
         elseif (!strcmp($type, "down")) {$tour_type = 2;}
         else {$tour_type = 0;}
         
+        if ((!$province || !$country) && $lat && $lon) {
+            $location = $utilities->ReverseGeocodeCoordinate($lat,$lon);
+            
+            $province = $location["province"];
+            $country = $location["country"];
+        }
+        
+        $description = addslashes($description);
+        
         $db = new XTDatabase();
         
-        if (!$db->Connect()) {return 0;}
-        $return = $db->InsertNewTour($tour_id, $count, $tour_type, $user_id, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating);
+        if (!$db->Connect()) {return "Error: Connection to database failed";}
+        $return = $db->InsertNewTour($tour_id, $count, $tour_type, $user_id, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $average_altitude, $cumulative_altitude, $average_descent, $cumulative_descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating, $anonymousTracking, $lowBatteryLevel);
         
-        if (!$return) {return 0;}
+        if (!$return) {return "Error: Could not insert file info into database";}
         
-        return 1;
+        return $fileName;
     }
     
     function UploadXML($fileNameTMP, $fileName, $user_id) {
         $regex = '/^(ImageInfo)_(20[0-9]{2}[0,1][0-9][0-3][0-9][0-2][0-9][0-5][0-9][0-5][0-9][0-9]{4})/';
         preg_match($regex, $fileName, $matches);
         
-        if (sizeof($matches) != 3) {return 0;}
+        if (sizeof($matches) != 3) {return "Error: inconsistent filename";}
         $tour_id = $matches[2];
         
         if (!$user_id) {
@@ -126,13 +143,13 @@
         }
         
         $path = "users/".$user_id."/tours/".$tour_id."/";
-        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return 0;}}
+        if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return "Error: Could not create tour directory";}}
         
         $result = move_uploaded_file($fileNameTMP, $path.$fileName);
-        if (!$result) {return 0;}
+        if (!$result) {return "Error: Copying file failed";}
         
         $file = $path.$fileName;
-        if (!file_exists($file)) {return 0;}
+        if (!file_exists($file)) {return "Error: File does not exist";}
         
         $parser = new XTXMLParser();
         $parser->OpenFile($file);
@@ -142,14 +159,16 @@
         
         $db = new XTDatabase();
         
-        if (!$db->Connect()) {return 0;}
+        if (!$db->Connect()) {return "Error: Connection to database failed";}
         
         foreach ($imageInfo as $image) {
-            $return = $db->InsertNewImage($tour_id, $user_id, $image["filename"], $image["longitude"], $image["latitude"], $image["elevation"], $image["comment"], $image["date"]);
+            $comment = addslashes($image["comment"]);
             
-            if (!$return) {return 0;}
+            $return = $db->InsertNewImage($tour_id, $user_id, $image["filename"], $image["longitude"], $image["latitude"], $image["elevation"], $comment, $image["date"]);
+            
+            if (!$return) {return "Error: Could not insert file info into database";}
         }
         
-        return 1;
+        return $fileName;
     }
 ?>

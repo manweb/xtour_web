@@ -9,7 +9,9 @@
     
     $box->PrintTimelineBox($_GET['tid'],500);
     
-    $box->PrintBoxWithContent2("<div id='map-canvas' style='height:480px'></div>", 500);
+    $box->PrintTourDescriptionBox($_GET['tid'],500);
+    
+    $box->PrintBoxWithContent2("<div id='map-canvas' style='height:300px'></div>", 500);
     
     $box->PrintGraphBox($_GET['tid'],500);
     

@@ -26,7 +26,7 @@ echo "<p style='margin-top: 10px'><input class='InputField' id='input_lastName' 
 echo "<p style='margin-top: 10px'><input class='InputField' id='input_email' type='text' width='100' name='EMail' value='E-Mail' style='color:#cbcbcb' onfocus=\"if(this.value=='E-Mail') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='E-Mail', this.style.color='#cbcbcb';}\"></p>\n";
 echo "<p style='margin-top: 10px'><input class='InputField' id='input_password' type='password' width='100' name='pwd' value='Passwort' style='color:#cbcbcb' onfocus=\"if(this.value=='Passwort') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Passwort', this.style.color='#cbcbcb';}\"></p>\n";
 echo "<input type='hidden' id='input_image_filename' name='ProfilePicture'>\n";
-echo "<p style='margin-top: 10px'><input class='InputButton' type='submit' value='Einloggen' onclick='InsertNewUser()'></p>\n";
+echo "<p style='margin-top: 10px'><input class='InputButton' type='submit' value='Anmelden' onclick='InsertNewUser()'></p>\n";
 echo "</td>\n";
 echo "</tr>\n";
 echo "</table>\n";

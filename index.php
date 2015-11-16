@@ -5,7 +5,7 @@
 <link rel="stylesheet" type="text/css" href="http://www.xtour.ch/XTStyleSheet.css">
 
 <script type="text/javascript"
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA6-uzb-yrCQjOpLgghI0AVvfp0RqZ2Jlc&sensor=false">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBPuq0ATTnjllDj0kaRN4TxLRD6drXU0gs&sensor=false">
     </script>
 
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -44,6 +44,8 @@ window.onpopstate = function(event) {
 </div>
 
 <div class="div_moving", id="div_moving"></div>
+
+<div class="div_info_container", id="div_info_container"><div class="div_info_top" id="div_info_top"></div><div class="div_info" id="div_info"></div></div>
 
 <div class="header_div">
 
@@ -99,7 +101,7 @@ window.onpopstate = function(event) {
 
 <?php
     
-    if ($_GET['tid']) {echo "<script>ShowTourDetails('".$_GET['tid']."')</script>\n";}
+    if ($_GET['tid']) {echo "<script>ShowTourDetails(0,'".$_GET['tid']."')</script>\n";}
     else {echo "<script>LoadMainDiv('http://www.xtour.ch/news_feed.php')</script>\n";}
 
 ?>

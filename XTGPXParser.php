@@ -21,12 +21,18 @@
         var $total_distance;
         var $total_altitude;
         var $total_descent;
+        var $total_average_altitude;
+        var $total_cumulative_altitude;
+        var $total_average_descent;
+        var $total_cumulative_descent;
         var $lowestPoint;
         var $highestPoint;
         var $country;
         var $province;
         var $description;
         var $rating;
+        var $anonymousTracking;
+        var $lowBatteryLevel;
         var $KML_doc;
         var $KML_document;
         var $KML_folder;
@@ -54,12 +60,18 @@
                 $this->total_distance = (double)$metadata_elements->TotalDistance;
                 $this->total_altitude = (double)$metadata_elements->TotalAltitude;
                 $this->total_descent = (double)$metadata_elements->TotalDescent;
+                $this->total_average_altitude = (double)$metadata->TotalAverageAltitude;
+                $this->total_cumulative_altitude = (double)$metadata->TotalCumulativeAltitude;
+                $this->total_average_descent = (double)$metadata->TotalAverageDescent;
+                $this->total_cumulative_descent = (double)$metadata->TotalCumulativeDescent;
                 $this->lowestPoint = (double)$metadata_elements->LowestPoint;
                 $this->highestPoint = (double)$metadata_elements->HighestPoint;
                 $this->country = (string)$metadata_elements->Country;
                 $this->province = (string)$metadata_elements->Province;
                 $this->description = (string)$metadata_elements->Description;
                 $this->rating = (string)$metadata_elements->Rating;
+                $this->anonymousTracking = (int)$metadata_elements->AnonymousTracking;
+                $this->lowBatteryLevel = (int)$metadata_elements->LowBatteryLevel;
             }
             
             // Get the track
@@ -107,6 +119,10 @@
                 $timestamp = $track_point_elements->time;
                 if ($timestamp != "") {$arrTMP["time"] = (string)$timestamp;}
                 else {$arrTMP["time"] = -999;}
+                
+                $battery = $track_point_elements->battery;
+                if ($battery != "") {$arrTMP["battery"] = (double)$battery;}
+                else {$arrTMP["battery"] = -999;}
                 
                 array_push($this->TrackPointArray, $arrTMP);
             }
@@ -178,6 +194,22 @@
             return $this->total_descent;
         }
         
+        function GetTotalAverageAltitude() {
+            return $this->total_average_altitude;
+        }
+        
+        function GetTotalCumulativeAltitude() {
+            return $this->total_cumulative_altitude;
+        }
+        
+        function GetTotalAverageDescent() {
+            return $this->total_average_descent;
+        }
+        
+        function GetTotalCumulativeDescent() {
+            return $this->total_cumulative_descent;
+        }
+        
         function GetLowestPoint() {
             return $this->lowestPoint;
         }
@@ -202,6 +234,14 @@
             return $this->rating;
         }
         
+        function GetAnonymousTracking() {
+            return $this->anonymousTracking;
+        }
+        
+        function GetLowBatteryLevel() {
+            return $this->lowBatteryLevel;
+        }
+        
         function GetFirstCoordinate() {
             if (!$this->TrackPointArray) {return 0;}
             
@@ -224,8 +264,8 @@
         function ConvertToKML() {
             if (!$this->parser) {return 0;}
             
-            if (fnmatch("*_up*.gpx",$this->fname)) {$color = "#red";}
-            else {$color = "#blue";}
+            if (fnmatch("*_up*.gpx",$this->fname)) {$color = "#blue";}
+            else {$color = "#red";}
             
             $this->CreateNewKML();
             $this->AddTrack($color,"Tour vom ".$this->start_time,"");

@@ -6,12 +6,14 @@
         
         var $countryList = array(
                              "Switzerland" => "map_ch2.png",
-                             "United States_California" => "map_us_ca.png",
-                             "United States_Colorado" => "map_us_co.png");
+                             "Schweiz" => "map_ch2.png",
+                             "United States_CA" => "map_us_ca.png",
+                             "United States_CO" => "map_us_co.png");
         var $countryRefCoordinates = array(
                                        "Switzerland" => array(5.96398, 10.492922, 47.8084, 45.818103),
-                                       "United States_California" => array(-128.56, -109.93, 42.0, 32.54),
-                                       "United States_Colorado" => array(-109.540666667,-101.540666667,41,36.994));
+                                       "Schweiz" => array(5.96398, 10.492922, 47.8084, 45.818103),
+                                       "United States_CA" => array(-128.56, -109.93, 42.0, 32.54),
+                                       "United States_CO" => array(-109.540666667,-101.540666667,41,36.994));
         
         function GetUserIDFromTour($tid) {
             return substr($tid, -4);
@@ -51,15 +53,15 @@
         }
         
         function GetMapNameForCountry($country, $province) {
-            if (!$province) {$name = $country;}
-            else {$name = $country."_".$province;}
+            if ($country == "United States") {$name = $country."_".$province;}
+            else {$name = $country;}
             
             return $this->countryList[$name];
         }
         
         function GetRefCoordinatesForCountry($country, $province) {
-            if (!$province) {$name = $country;}
-            else {$name = $country."_".$province;}
+            if ($country == "United States") {$name = $country."_".$province;}
+            else {$name = $country;}
             
             return $this->countryRefCoordinates[$name];
         }
@@ -133,6 +135,19 @@
             return $return;
         }
         
+        function TourHasDescriptionAndComments($tid) {
+            $db = new XTDatabase();
+            
+            if (!$db->Connect()) {return 0;}
+            
+            $numComments = $db->GetNumberOfComments($tid);
+            
+            $sumInfo = $db->GetTourSumInfo($tid);
+            if ($sumInfo["description"] == "" && $numComments == 0) {return 0;}
+            
+            return 1;
+        }
+        
         function GetFormattedLongitude($lon) {
             if ($lon < 0) {$EW = "W";}
             else {$EW = "E";}
@@ -157,6 +172,30 @@
             $seconds = round((($lat - $degree)*60 - $minutes)*60,1);
             
             return $degree."°".$minutes."'".$seconds."\" ".$NS;
+        }
+        
+        function ReverseGeocodeCoordinate($lat,$lon) {
+            $url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=".$lat.",".$lon."&key=AIzaSyCd4S80ByTD78GYYNZb-yLb5E8nev_Lqw0";
+            $result = file_get_contents($url);
+            
+            $data = json_decode($result,true);
+            
+            $ch = curl_init();
+            curl_setopt ($ch, CURLOPT_URL, $url);
+            curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($ch);
+            if (curl_errno($ch)) {
+                echo curl_error($ch);
+                echo "\n<br />";
+                $contents = '';
+            } else {
+                curl_close($ch);
+            }
+            
+            $data = json_decode($result,true);
+            
+            return array("province" => $data['results'][0]['address_components'][4]['long_name'], "country" => $data['results'][0]['address_components'][5]['long_name']);
         }
     }
     

@@ -25,8 +25,8 @@
             $currentImageInfo = 0;
         }
         
-        if ($currentImageInfo) {$imageInfoString = $images[$i].",".$currentImageInfo["date"].",".$currentImageInfo["longitude"].",".$currentImageInfo["latitude"].",".$currentImageInfo["elevation"].",".$currentImageInfo["comment"];}
-        else {$imageInfoString = ",,,,,";}
+        if ($currentImageInfo) {$imageInfoString = $currentImageInfo["userID"].",".$currentImageInfo["tourID"].",".$images[$i].",".$currentImageInfo["date"].",".$currentImageInfo["longitude"].",".$currentImageInfo["latitude"].",".$currentImageInfo["elevation"].",".$currentImageInfo["comment"];}
+        else {$imageInfoString = ",,,,,,,";}
         
         $imagesString .= $imageInfoString.";";
     }
