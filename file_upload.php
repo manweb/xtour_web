@@ -33,11 +33,9 @@
         $tour_id = $matches[1];
         $count = $matches[2];
         
-        if (!$user_id) {
-            $utilities = new XTUtilities();
+        $utilities = new XTUtilities();
             
-            $user_id = $utilities->GetUserIDFromTour($tour_id);
-        }
+        $user_id = $utilities->GetUserIDFromTour($tour_id);
         
         $path = "users/".$user_id."/tours/".$tour_id."/images/";
         if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return "Error: Could not create tour directory";}}
@@ -59,9 +57,7 @@
         
         $utilities = new XTUtilities();
         
-        if (!$user_id) {
-            $user_id = $utilities->GetUserIDFromTour($tour_id);
-        }
+        $user_id = $utilities->GetUserIDFromTour($tour_id);
         
         $path = "users/".$user_id."/tours/".$tour_id."/";
         if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return "Error: Could not create tour directory";}}
@@ -79,16 +75,27 @@
         $date = strtotime($parser->GetStartTime());
         $startDate = $parser->GetStartTime();
         $endDate = $parser->GetEndTime();
-        $coordinate = $parser->GetFirstCoordinate();
-        if ($coordinate) {
-            $lat = $coordinate["latitude"];
-            $lon = $coordinate["longitude"];
-            $alt = $coordinate["elevation"];
+        $start_coordinate = $parser->GetFirstCoordinate();
+        if ($start_coordinate) {
+            $start_lat = $start_coordinate["latitude"];
+            $start_lon = $start_coordinate["longitude"];
+            $start_alt = $start_coordinate["elevation"];
         }
         else {
-            $lat = 0;
-            $lon = 0;
-            $alt = 0;
+            $start_lat = 0;
+            $start_lon = 0;
+            $start_alt = 0;
+        }
+        $stop_coordinate = $parser->GetLastCoordinate();
+        if ($stop_coordinate) {
+            $stop_lat = $stop_coordinate["latitude"];
+            $stop_lon = $stop_coordinate["longitude"];
+            $stop_alt = $stop_coordinate["elevation"];
+        }
+        else {
+            $stop_lat = 0;
+            $stop_lon = 0;
+            $stop_alt = 0;
         }
         $time = $parser->GetTotalTime();
         $distance = $parser->GetTotalDistance();
@@ -99,13 +106,16 @@
         $average_descent = $parser->GetTotalAverageDescent();
         $cumulative_descent = $parser->GetTotalCumulativeDescent();
         $lowestPoint = $parser->GetLowestPoint();
+        if ($lowestPoint == 0) {$lowestPoint = $parser->GetMinAlt();}
         $highestPoint = $parser->GetHighestPoint();
+        if ($highestPoint == 0) {$highestPoint = $parser->GetMaxAlt();}
         $country = $parser->GetCountry();
         $province = $parser->GetProvince();
         $description = $parser->GetDescription();
         $rating = $parser->GetRating();
         $anonymousTracking = $parser->GetAnonymousTracking();
-        $lowBatterLevel = $parser->GetLowBatteryLevel();
+        $lowBatteryLevel = $parser->GetLowBatteryLevel();
+        $mountainPeak = $parser->GetMountainPeak();
         if (!strcmp($type, "up")) {$tour_type = 1;}
         elseif (!strcmp($type, "down")) {$tour_type = 2;}
         else {$tour_type = 0;}
@@ -119,10 +129,12 @@
         
         $description = addslashes($description);
         
+        $mountainPeak = addslashes($mountainPeak);
+        
         $db = new XTDatabase();
         
         if (!$db->Connect()) {return "Error: Connection to database failed";}
-        $return = $db->InsertNewTour($tour_id, $count, $tour_type, $user_id, $date, $startDate, $endDate, $lat, $lon, $alt, $time, $distance, $altitude, $descent, $average_altitude, $cumulative_altitude, $average_descent, $cumulative_descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating, $anonymousTracking, $lowBatteryLevel);
+        $return = $db->InsertNewTour($tour_id, $count, $tour_type, $user_id, $date, $startDate, $endDate, $start_lat, $start_lon, $start_alt, $stop_lat, $stop_lon, $stop_alt, $time, $distance, $altitude, $descent, $average_altitude, $cumulative_altitude, $average_descent, $cumulative_descent, $lowestPoint, $highestPoint, $country, $province, $description, $rating, $anonymousTracking, $lowBatteryLevel, $mountainPeak);
         
         if (!$return) {return "Error: Could not insert file info into database";}
         
@@ -136,11 +148,9 @@
         if (sizeof($matches) != 3) {return "Error: inconsistent filename";}
         $tour_id = $matches[2];
         
-        if (!$user_id) {
-            $utilities = new XTUtilities();
+        $utilities = new XTUtilities();
             
-            $user_id = $utilities->GetUserIDFromTour($tour_id);
-        }
+        $user_id = $utilities->GetUserIDFromTour($tour_id);
         
         $path = "users/".$user_id."/tours/".$tour_id."/";
         if (!file_exists($path)) {if (!mkdir($path, 0777, true)) {return "Error: Could not create tour directory";}}

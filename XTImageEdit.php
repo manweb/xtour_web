@@ -80,9 +80,9 @@
         function CreateProfilePicture($file) {
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             
-            if ($ext != "jpg" && $ext != "JPG" && $ext != "png" && $ext != "PNG") {return 0;}
+            if ($ext != "jpg" && $ext != "JPG" && $ext != "jpeg" && $ext != "JPEG" && $ext != "png" && $ext != "PNG") {return 0;}
             
-            if ($ext == "jpg" || $ext == "JPG") {$im = imagecreatefromjpeg($file);}
+            if ($ext == "jpg" || $ext == "JPG" || $ext == "jpeg" || $ext == "JPEG") {$im = imagecreatefromjpeg($file);}
             else {$im = imagecreatefrompng($file);}
             
             $im_width = imagesx($im);

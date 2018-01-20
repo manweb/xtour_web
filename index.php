@@ -47,6 +47,35 @@ window.onpopstate = function(event) {
 
 <div class="div_info_container", id="div_info_container"><div class="div_info_top" id="div_info_top"></div><div class="div_info" id="div_info"></div></div>
 
+<?php
+    if (isset($_COOKIE["userID"])) {echo "<div class='content_div' id='content_div'>\n";}
+    else {
+        echo "<div class='content_div_blurred_overlay' id='content_div_blurred_overlay'>\n";
+        
+        echo "<div class='content_div_blurred_content' id='content_div_blurred_content'>\n";
+        
+        echo "<div style='width: 400px; height: 300px; position: absolute; left: 50%; margin-left: -500px;'><img src='images/iPhone_6_App.png' width='400px'></div>\n";
+        
+        echo "<div style='width: 200px; height: 300px; position: absolute; left: 50%;' id='div_blur_content'>\n";
+        
+        echo "<p style='margin-top: 100px; margin-right: 0px; margin-left: 0px; margin-bottom: 0px;'></p>\n";
+        
+        echo "<p align='center'><font style='font-family: helvetica; font-size: 18;'>XTour sucht Tester f&uuml;r die iPhone App. Falls du Interesse hast melde dich gleich hier an</font><br><br>\n";
+        
+        echo "<input class='InputButton' type='submit' value='Registrieren' onclick='ShowRegister()'></p>\n";
+        
+        echo "<p style='margin-top: 10px'></p>\n";
+        
+        echo "</div>\n";
+        
+        echo "<div style='width: 80px; position: absolute; right: 10px; margin-top: 10px;'><font style='font-family: helvetica; font-size: 15;'><a href='javascript:void(0)' onclick='ShowLogin()'>Anmelden</a></font></div>\n";
+        
+        echo "</div></div>\n";
+        
+        echo "<div class='content_div_blurred' id='content_div'>\n";
+    }
+?>
+
 <div class="header_div">
 
 <div class="header_icon"></div>
@@ -102,11 +131,14 @@ window.onpopstate = function(event) {
 <?php
     
     if ($_GET['tid']) {echo "<script>ShowTourDetails(0,'".$_GET['tid']."')</script>\n";}
+    else if ($_GET['uid']) {echo "<script>ShowUserDetails('".$_GET['uid']."')</script>\n";}
     else {echo "<script>LoadMainDiv('http://www.xtour.ch/news_feed.php')</script>\n";}
 
 ?>
 
 </div>
+
+<div id="LoadMoreDiv" style="position: relative; display: none; margin-top: 0px; margin-bottom: 20px;"><p align="center"><img src="images/loading.gif" width="80"></p></div>
 
         </td>
         <td width='200' align='left' valign='top' style='padding-left: 10px'>
@@ -116,6 +148,8 @@ window.onpopstate = function(event) {
         </td>
     </tr>
 </table>
+
+</div>
 
 </div>
 

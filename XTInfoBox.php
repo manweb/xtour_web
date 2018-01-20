@@ -188,6 +188,7 @@
             if ($uid == $_COOKIE['userID']) {$iconDisplay = "block";}
             
             echo "<div class='delete_icon_div' id='delete_icon_div_".$tid."' style='display: ".$iconDisplay."'>\n";
+            echo "<img id='feedbox_hide' src='http://www.xtour.ch/images/google_earth_icon.png' width='15' onmouseover='ShowInfoDiv(this, \"Download\"); this.src=\"http://www.xtour.ch/images/google_earth_icon_selected.png\"' onmouseout='HideInfoDiv(); this.src=\"http://www.xtour.ch/images/google_earth_icon.png\"' onclick='window.location=\"http://www.xtour.ch/users/".$uid."/tours/".$tid."/".$tid."_merged.kml\"; return false;'>";
             echo "<img id='feedbox_hide' src='http://www.xtour.ch/images/hide_icon.png' width='15' onmouseover='ShowInfoDiv(this, \"Verstecken\"); this.src=\"http://www.xtour.ch/images/hide_icon_selected.png\"' onmouseout='HideInfoDiv(); this.src=\"http://www.xtour.ch/images/hide_icon.png\"' onclick='HideTour(".$tid.")'>";
             echo "<img id='feedbox_close' src='http://www.xtour.ch/images/close_icon.png' width='15' onmouseover='ShowInfoDiv(this,\"Löschen\"); this.src=\"http://www.xtour.ch/images/close_icon_selected.png\"' onmouseout='HideInfoDiv(); this.src=\"http://www.xtour.ch/images/close_icon.png\"' onclick='DeleteTour(".$tid.")'>";
             echo "</div>\n";
@@ -197,22 +198,23 @@
             
             echo "<table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
-            echo "<td width='80' align='left' valign='top' style='padding-left: 10px; border-color: #cfcfcf; border-right-style: solid; border-right-width: 1px;'>\n";
-            echo "<img src='".$img."' width='50'>\n";
+            echo "<td width='80' align='left' valign='top' style='padding-left: 10px; padding-top: 5px; border-color: #cfcfcf; border-right-style: solid; border-right-width: 1px;'>\n";
+            $img_original = str_replace(".png","_original.png",$img);
+            echo "<img id='profile_picture' src='".$img."' width='50' style='cursor : pointer;' onclick='toggle_dim(350,400,\"http://www.xtour.ch/show_profile_picture.php?fname=".$img_original."&userID=".$uid."\")'>\n";
             echo "</td>\n";
             echo "<td width='210' align='left' valign='top'>\n";
             echo "<table width='210' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
-            echo "<td width='70' align='center' style='padding-left: 10px' valign='top'>\n<img src='images/clock_icon.png' width='30'>\n";
-            echo "<p style='margin-top: 5px'><font color='#2f2f2f' style='font-family:helvetica' size='1'>".$time2."</font></p>\n";
+            echo "<td width='70' align='center' style='padding-left: 10px; padding-top: 5px;' valign='top'>\n<img src='images/clock_icon.png' width='35'>\n";
+            echo "<p style='margin-top: 5px'><font class='NewsFeedFont'>".$time2."</font></p>\n";
             echo "</td>\n";
-            echo "<td width='70' align='center' style='padding-left: 10px' valign='top'>\n";
-            echo "<img src='images/altitude_icon.png' width='30'>\n";
-            echo "<p style='margin-top: 5px'><font color='#2f2f2f' style='font-family:helvetica' size='1'>".$altitude."m</font></p>\n";
+            echo "<td width='70' align='center' style='padding-left: 10px; padding-top: 5px;' valign='top'>\n";
+            echo "<img src='images/altitude_icon.png' width='35'>\n";
+            echo "<p style='margin-top: 5px'><font class='NewsFeedFont'>".$altitude." m</font></p>\n";
             echo "</td>\n";
-            echo "<td width='70' align='center' style='padding-left: 10px' valign='top'>\n";
-            echo "<img src='images/skier_up_icon.png' width='30'>\n";
-            echo "<p style='margin-top: 5px'><font color='#2f2f2f' style='font-family:helvetica' size='1'>".$distance.$distanceUnit."</font></p>\n";
+            echo "<td width='70' align='center' style='padding-left: 10px; padding-top: 5px;' valign='top'>\n";
+            echo "<img src='images/skier_up_icon.png' width='35'>\n";
+            echo "<p style='margin-top: 5px'><font class='NewsFeedFont'>".$distance." ".$distanceUnit."</font></p>\n";
             echo "</td>\n";
             echo "</tr>\n";
             echo "</table>\n";
@@ -252,6 +254,11 @@
             if ($description != "") {
                 echo "<div class='div_tour_description' style='width: 425px;'><font class='TourDescriptionFont'>".$description."</font></div>";
             }
+            else if ($uid == $_COOKIE['userID']) {
+                echo "<div class='div_tour_description_empty' id='description_".$tid."' style='width: 425px;'>\n";
+                echo "<textarea class='DescriptionTextarea' placeholder='Beschreibung hinzufügen' onkeyup='textarea_resize(this)' onkeypress='captureEnter(event,\"description_".$tid."\",".$width.",0,this)'></textarea>\n";
+                echo "</div>\n";
+            }
             
             echo "<div id='".$tid."_div_comment' style='position: relative;'>\n";
             
@@ -265,8 +272,8 @@
             echo "<p style='margin-top: 2px'></p>";
             
             while ($comment = $DB->NextComment()) {
-                $img = "users/".$comment["UID"]."/profile.png";
-                $this->PrintComment(40, 433, $uid, $comment["ID"], $img, $comment["name"], $comment["date"], $comment["comment"]);
+                $img = "http://www.xtour.ch/users/".$comment["UID"]."/profile.png";
+                $this->PrintComment(40, 433, $tid, $comment["UID"], $comment["ID"], $img, $comment["name"], $comment["date"], $comment["comment"]);
             }
             
             echo "</div>\n";
@@ -274,11 +281,11 @@
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
             
             if (isset($_COOKIE["userID"])) {
-                $img = "users/".$_COOKIE["userID"]."/profile.png";
+                $img = "http://www.xtour.ch/users/".$_COOKIE["userID"]."/profile.png";
             }
-            else {$img = "images/profile_icon_grey.png";}
+            else {$img = "http://www.xtour.ch/images/profile_icon_grey.png";}
             
-            $this->PrintCommentTextfield(450, $img, $tid);
+            $this->PrintCommentTextfield(433, 40, $img, $tid);
             
             echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
             
@@ -304,6 +311,9 @@
             $sumInfo = $db->GetTourSumInfo($tid);
             $info = $db->GetTourInfo($tid);
             
+            $num_up = $db->GetNumUp($tid);
+            $num_down = $db->GetNumDown($tid);
+            
             $nSections = sizeof($info);
             if ($nSections > 6) {$nSections = 6; $cont = 1;}
             
@@ -317,8 +327,14 @@
                 $currentTour = $info[$i];
                 $offset = $i*$sectionWidth + 10;
                 if ($i == 0) {$title = "&Uuml;bersicht";}
-                if ($currentTour['type'] == 1) {$title = "Aufstieg #".$currentTour['count'];}
-                if ($currentTour['type'] == 2) {$title = "Abfahrt #".$currentTour['count'];}
+                if ($currentTour['type'] == 1) {
+                    if ($num_up == 1) {$title = "Aufstieg";}
+                    else {$title = "Aufstieg #".$currentTour['count'];}
+                }
+                if ($currentTour['type'] == 2) {
+                    if ($num_down == 1) {$title = "Abfahrt";}
+                    else {$title = "Abfahrt #".$currentTour['count'];}
+                }
                 
                 if ($nSections == 2 && $i == 1) {$title = "";}
                 
@@ -348,11 +364,21 @@
                         echo "<font class='TimeLineFontDetail'>\n";
                         $unit = $UnitsArray[$i*4+$k];
                         if ($i == 0 && $k == 0) {echo $utilities->GetFormattedTimeFromSeconds($info[$n]["time"]);}
-                        if ($i == 0 && $k == 1) {echo $info[$n]["distance"]*1000.0." ".$unit;}
-                        if ($i == 0 && $k == 2) {echo round($info[$n]["distance"]/$info[$n]["time"]*3600000.0)." ".$unit;}
+                        if ($i == 0 && $k == 1) {
+                            if ($info[$n]["distance"] >= 10) {echo round($info[$n]["distance"],1)." km";}
+                            else {echo $info[$n]["distance"]*1000.0." ".$unit;}
+                        }
+                        if ($i == 0 && $k == 2) {
+                            $speed = round($info[$n]["distance"]/$info[$n]["time"]*3600000.0);
+                            
+                            if ($speed >= 1000) {echo round($speed/1000.0,1)." km/h";}
+                            else {echo $speed." ".$unit;}
+                        }
                         if ($i == 0 && $k == 3) {echo $info[$n]["ascent"]." ".$unit;}
-                        if ($i == 1 && $k == 0) {echo $info[$n]["lowestPoint"]." ".$unit;}
-                        if ($i == 1 && $k == 1) {echo $info[$n]["highestPoint"]." ".$unit;}
+                        if ($i == 1 && $k == 0) {echo sprintf("%.1f %s",$info[$n]["lowestPoint"],$unit);}
+                        if ($i == 1 && $k == 1) {echo sprintf("%.1f %s",$info[$n]["highestPoint"],$unit);}
+                        if ($i == 1 && $k == 2) {echo sprintf("%.0f %s",$info[$n]["ascent"]/$info[$n]["time"]*3600,$unit);}
+                        if ($i == 1 && $k == 3) {echo sprintf("%.0f %s",$info[$n]["descent"]/$info[$n]["time"]*3600,$unit);}
                         echo "</font>\n";
                         echo "</div>\n";
                     }
@@ -566,7 +592,7 @@
                 echo "</div>\n";
             }
             
-            echo "<div style='position: relative; margin-top: 20px; width: 480px;>\n";
+            echo "<div id='".$tid."_div_comment' style='position: relative; margin-top: 20px; width: 480px;>\n";
             
             // Print comments for this tour
             $DB = new XTDatabase();
@@ -579,10 +605,22 @@
             
             while ($comment = $DB->NextComment()) {
                 $img = "http://www.xtour.ch/users/".$comment["UID"]."/profile.png";
-                $this->PrintComment(15, 463, $uid, $comment["ID"], $img, $comment["name"], $comment["date"], $comment["comment"]);
+                $this->PrintComment(15, 463, $tid, $comment["UID"], $comment["ID"], $img, $comment["name"], $comment["date"], $comment["comment"]);
             }
             
             echo "</div>\n";
+            
+            echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
+            
+            if (isset($_COOKIE["userID"])) {
+                $img = "http://www.xtour.ch/users/".$_COOKIE["userID"]."/profile.png";
+            }
+            else {$img = "http://www.xtour.ch/images/profile_icon_grey.png";}
+            
+            $this->PrintCommentTextfield(463, 15, $img, $tid);
+            
+            echo "<p style='margin-top: 5px; margin-bottom: 0px;'></p>";
+            
             echo "</div>\n";
         }
         
@@ -607,6 +645,10 @@
             
             echo "<div id='chart_div' style='width: ".($width-40)."px; height: 200px; position: absolute; top: 35px; left: 10px;'></div>";
             
+            echo "<div id='GraphInfoBoxLine' style='position: absolute; top: 55px; left: 150px; width: 1px; height: 160px; margin-left: 10px; border-style: none; border-width: 0px; background-color: #000000;'></div>";
+            
+            echo "<div id='GraphInfoBox' style='position: absolute; top: 35px; left: 50px; width: 200px; height: 20px; margin-left: 10px; border-style: none; border-width: 0px; background-color: #FFFFFF;'></div>";
+            
             echo "</div>\n";
         }
         
@@ -617,6 +659,7 @@
             $db = new XTDatabase();
             
             $path = $utilities->GetTourImagePath($tid,"f");
+            $localPath = $utilities->GetTourImagePath($tid);
             
             $images = $fileBrowser->GetImagesForTour($tid);
             $nImages = $fileBrowser->GetNumImages();
@@ -649,7 +692,7 @@
                         $img = $images[$n];
                         $imgPath = $path.$img;
                         $img2 = str_replace(".jpg","_thumb.jpg",$imgPath);
-                        if (!file_exists($img2)) {$imageEdit->GetSquareImage($imgPath,200);}
+                        if (!file_exists($img2)) {$imageEdit->GetSquareImage($localPath.$img,200);}
                         
                         $imageInfo = $db->GetImageInfoForImage($img);
                     
@@ -694,7 +737,7 @@
             echo "</div>\n";
         }
         
-        function PrintComment($marginLeft, $width, $uid, $commentID, $img, $name, $date, $comment) {
+        function PrintComment($marginLeft, $width, $tid, $uid, $commentID, $img, $name, $date, $comment) {
             /*echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td width='20' height='20'><img src='".$img."' width='20'></td>\n";
@@ -754,25 +797,25 @@
             echo "</tr>\n";
             echo "</table>\n";*/
             
-            echo "<div class='comment_container_div' style='margin-left: ".$marginLeft."px; width: ".$width."px'>\n";
+            echo "<div class='comment_container_div' id='comment_".$commentID."' style='margin-left: ".$marginLeft."px; width: ".$width."px'>\n";
             
             echo "<div class='comment_img_div2'><img src='".$img."' width='30'></div>\n";
             
             $iconDisplay = "none";
-            if ($uid == $_COOKIE['userID']) {$iconDisplay = "inline block";}
+            if ($uid == $_COOKIE['userID']) {$iconDisplay = "block";}
             
-            echo "<div class='comment_edit_icons' style='left: ".($width-20)."px; display: ".$iconDisplay."'><img src='http://www.xtour.ch/images/edit_icon.png' width='10'><img src='http://www.xtour.ch/images/close_icon.png' width='10'></div>\n";
+            echo "<div class='comment_edit_icons' style='left: ".($width-20)."px; display: ".$iconDisplay."'><img src='http://www.xtour.ch/images/edit_icon.png' width='10' id='comment_edit' onmouseover='ShowInfoDiv(this,\"Bearbeiten\")' onmouseout='HideInfoDiv()' onclick='EditComment(".$commentID.",".$width.",".$marginLeft.",\"".$comment."\",\"".$img."\",".$tid."); HideInfoDiv();'><img src='http://www.xtour.ch/images/close_icon.png' width='10' id='comment_delete' onmouseover='ShowInfoDiv(this,\"Löschen\")' onmouseout='HideInfoDiv()' onclick='DeleteComment(".$commentID.")'></div>\n";
             echo "<div class='comment_header_div'><font class='CommentHeaderFont'>".$name." am ".date("d.m.Y h:i:s", $date)."</font></div>\n";
             echo "<div class='comment_content_div'>\n";
             echo "<font class='CommentFont'>".$comment."</font>";
             echo "</div>\n";
             
             echo "</div>\n";
-            echo "<p style='margin-top: 0px; margin-bottom: 5px;'></p>\n";
+            echo "<p style='margin-top: 0px; margin-bottom: 20px;'></p>\n";
             
         }
         
-        function PrintCommentTextfield($width, $img, $tid) {
+        function PrintCommentTextfield($width, $marginLeft, $img, $tid) {
             /*echo "<table width='".$width."' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
             echo "<tr>\n";
             echo "<td width='20' height='20' valign='top'><img src='".$img."' width='20'></td>\n";
@@ -812,11 +855,11 @@
             echo "</tr>\n";
             echo "</table>\n";*/
             
-            echo "<div class='comment_container_div'>\n";
+            echo "<div class='comment_container_div' style='width: ".$width."px; margin-left: ".$marginLeft."px;'>\n";
             
             echo "<div class='comment_img_div' style='background-image: url(\"".$img."\")'></div>\n";
             echo "<div class='comment_content_textfield_div'>\n";
-            echo "<textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(event,\"".$tid."\",450,this)'></textarea>";
+            echo "<textarea class='CommentTextarea' placeholder='Kommentar schreiben' onkeyup='textarea_resize(this)' onkeypress='captureEnter(event,\"".$tid."\",".$width.",".$marginLeft.",this)'></textarea>";
             echo "</div>\n";
             
             echo "</div>\n";

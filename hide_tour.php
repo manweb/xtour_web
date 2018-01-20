@@ -6,9 +6,11 @@
     
     $db = new XTDatabase();
     
-    if (!$db->Connect()) {return 0;}
+    if (!$db->Connect()) {echo "false"; return 0;}
     
     $db->HideTour($tourID);
+    
+    echo "true";
     
     return 1;
 ?>

@@ -8,12 +8,14 @@
                              "Switzerland" => "map_ch2.png",
                              "Schweiz" => "map_ch2.png",
                              "United States_CA" => "map_us_ca.png",
-                             "United States_CO" => "map_us_co.png");
+                             "United States_CO" => "map_us_co.png",
+                             "United States_California" => "map_us_ca.png");
         var $countryRefCoordinates = array(
                                        "Switzerland" => array(5.96398, 10.492922, 47.8084, 45.818103),
                                        "Schweiz" => array(5.96398, 10.492922, 47.8084, 45.818103),
                                        "United States_CA" => array(-128.56, -109.93, 42.0, 32.54),
-                                       "United States_CO" => array(-109.540666667,-101.540666667,41,36.994));
+                                       "United States_CO" => array(-109.540666667,-101.540666667,41,36.994),
+                                       "United States_California" => array(-128.56, -109.93, 42.0, 32.54));
         
         function GetUserIDFromTour($tid) {
             return substr($tid, -4);

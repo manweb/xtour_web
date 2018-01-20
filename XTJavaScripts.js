@@ -34,6 +34,12 @@ $(window).scroll(function() {
                  $('.header_login_icon').css({width: 30, height: 30});
                  $('.header_login').css({top: 10});
                  }
+                 
+                 if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+                 if (document.getElementById("LoadMoreDiv").style.display == "none") {
+                 LoadMoreNewsFeeds();
+                 }
+                 }
                  });
 
 function initialize(filename, tid) {
@@ -44,11 +50,136 @@ function initialize(filename, tid) {
     };
     map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
     
+    /*var jsonData1 = $.ajax({
+                           url: "http://www.xtour.ch/get_path_coordinates.php?tid=" + tid,
+                           dataType:"json",
+                           async: false
+                           }).responseText;
+    
+    var pathCoordinatesArray = $.parseJSON(jsonData1);
+    
+    var bounds = new google.maps.LatLngBounds();
+    
+    var pathArray = [];
+    var paths = [];
+    var inclination;
+    var inclinationNew;
+    var inclinationOld = -1;
+    for (var i = 0; i < pathCoordinatesArray.length; i++) {
+        pathArray.push(new google.maps.LatLng(pathCoordinatesArray[i][1],pathCoordinatesArray[i][0]));
+        inclination = pathCoordinatesArray[i][2];
+        
+        bounds.extend(new google.maps.LatLng(pathCoordinatesArray[i][1],pathCoordinatesArray[i][0]));
+        
+        if (pathArray.length < 2) {continue;}
+        
+        if (inclination < 30) {inclinationNew = 30;}
+        if (inclination >= 30 && inclination < 40) {inclinationNew = 40;}
+        if (inclination >= 40) {inclinationNew = 50;}
+        
+        if (inclinationOld == -1) {inclinationOld = inclinationNew; continue;}
+        if (inclinationNew == inclinationOld) {continue;}
+        
+        var pathColor;
+        switch (inclinationOld) {
+            case 30:
+                pathColor = '#00FF00';
+                break;
+            case 40:
+                pathColor = '#0000FF';
+                break;
+            case 50:
+                pathColor = '#FF0000';
+                break;
+        }
+        
+        paths.push(new google.maps.Polyline({
+                                                path: pathArray,
+                                                strokeColor: pathColor,
+                                                strokeOpacity: 0.8,
+                                                strokeWeight: 4
+                                                }));
+        
+        paths[paths.length-1].setMap(map);
+        
+        inclinationOld = inclinationNew;
+        
+        var arrTMP = pathArray[pathArray.length-1];
+        
+        pathArray = [];
+        
+        pathArray.push(arrTMP);
+    }
+    
+    if (paths.length == 0 && pathArray.length > 0) {
+        var pathColor;
+        switch (inclinationOld) {
+            case 30:
+                pathColor = '#00FF00';
+                break;
+            case 40:
+                pathColor = '#0000FF';
+                break;
+            case 50:
+                pathColor = '#FF0000';
+                break;
+        }
+        
+        paths.push(new google.maps.Polyline({
+                                            path: pathArray,
+                                            strokeColor: pathColor,
+                                            strokeOpacity: 0.8,
+                                            strokeWeight: 4
+                                            }));
+        
+        paths[paths.length-1].setMap(map);
+    }
+    
+    map.fitBounds(bounds);*/
+    
     for (i = 0; i < filename.length; i++) {
         var fname = 'http://www.xtour.ch/'+filename[i];
         
         kmlLayers[i] = new google.maps.KmlLayer(fname);
         kmlLayers[i].setMap(map);
+    }
+    
+    var jsonDataCoordinates = $.ajax({
+                          url: "http://www.xtour.ch/get_start_stop_coordinates.php?tid=" + tid,
+                          dataType:"json",
+                          async: false
+                          }).responseText;
+    
+    var startStopMarkers = $.parseJSON(jsonDataCoordinates);
+    
+    var startIcon = new google.maps.MarkerImage("http://www.xtour.ch/images/markerIcon_green.png",null,new google.maps.Point(0,0),new google.maps.Point(8,8),new google.maps.Size(16,16));
+    var stopIcon = new google.maps.MarkerImage("http://www.xtour.ch/images/markerIcon_red.png",null,new google.maps.Point(0,0),new google.maps.Point(8,8),new google.maps.Size(16,16));
+    var sectionIcon = new google.maps.MarkerImage("http://www.xtour.ch/images/markerIcon_gray.png",null,new google.maps.Point(0,0),new google.maps.Point(8,8),new google.maps.Size(16,16));
+    
+    var startStopMarker, k;
+    
+    for (k = 0; k < startStopMarkers.length; k++) {
+        if (k == 0) {
+            startStopMarker = new google.maps.Marker({
+                                             position: new google.maps.LatLng(startStopMarkers[k][0], startStopMarkers[k][1]),
+                                             map: map,
+                                             icon: startIcon
+                                             });
+        }
+        else if(k == startStopMarkers.length - 1) {
+            startStopMarker = new google.maps.Marker({
+                                                     position: new google.maps.LatLng(startStopMarkers[k][0], startStopMarkers[k][1]),
+                                                     map: map,
+                                                     icon: stopIcon
+                                                     });
+        }
+        else {
+            startStopMarker = new google.maps.Marker({
+                                                     position: new google.maps.LatLng(startStopMarkers[k][0], startStopMarkers[k][1]),
+                                                     map: map,
+                                                     icon: sectionIcon
+                                                     });
+        }
     }
     
     var jsonData = $.ajax({
@@ -79,12 +210,13 @@ function initialize(filename, tid) {
     }
     
     var myLatlng = new google.maps.LatLng(46.770809,8.377733);
-    var markerPositionIcon = {
-    url: "http://www.xtour.ch/images/markerIcon.png",
+    /*var markerPositionIcon = {
+    url: "http://www.xtour.ch/images/markerIcon_blue.png",
     size: new google.maps.Size(16,16),
     origin: new google.maps.Point(0,0),
     anchor: new google.maps.Point(8,8)
-    };
+    };*/
+    var markerPositionIcon = new google.maps.MarkerImage("http://www.xtour.ch/images/markerIcon_blue.png", null, new google.maps.Point(0,0), new google.maps.Point(8,8), new google.maps.Size(16,16));
     marker = new google.maps.Marker({position: myLatlng, map: map, title:"Picture info here", icon: markerPositionIcon});
 }
 
@@ -210,9 +342,9 @@ function drawChart(tid) {
     data2 = new google.visualization.DataTable(jsonData2);
     data3 = new google.visualization.DataTable(jsonData3);
     
-    data1.addRow([null, null, null, null]);
-    data2.addRow([null, null, null, null]);
-    data3.addRow([null, null, null, null]);
+    //data1.addRow([null, null, null, null]);
+    //data2.addRow([null, null, null, null]);
+    //data3.addRow([null, null, null, null]);
     
     data = data1;
     
@@ -227,14 +359,14 @@ function drawChart(tid) {
     // Instantiate and draw our chart, psassing in some options.
     chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
     
-    options1 = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
-    options1withAnimation = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}, animation: {duration: 1000, easing: 'in'}}
+    options1 = {hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+    options1withAnimation = {hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}, animation: {duration: 1000, easing: 'in'}}
     
-    options2 = {annotation: {1: {style: 'line'}}, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
-    options2withAnimation = {annotation: {1: {style: 'line'}}, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'},animation: {duration: 1000, easing: 'in'}}
+    options2 = {tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+    options2withAnimation = {tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'},animation: {duration: 1000, easing: 'in'}}
     
-    options3 = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
-    options3withAnimation = {annotation: {1: {style: 'line'}}, hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}, animation: {duration: 1000, easing: 'in'}}
+    options3 = {hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}}
+    options3withAnimation = {hAxis: { ticks: tickLabels }, tooltip: {trigger: 'none'}, dataOpacity: 0, lineWidth: 2, curveType: 'function', width: 480, height: 200, chartArea: {width: '80%', height: '80%'}, legend: {position: 'none'}, animation: {duration: 1000, easing: 'in'}}
     
     options = options1;
     //chart.draw(data, options);
@@ -267,7 +399,7 @@ function drawChart(tid) {
                                                                                  var id = GetClosestValue(xVal);
                                                                                  
                                                                                  // set the x-axis value of the annotation
-                                                                                 data.setValue(annotationRowIndex, 0, data.getValue(id, 0).toString());
+                                                                                 //data.setValue(annotationRowIndex, 0, data.getValue(id, 0).toString());
                                                                                  // set the value to display on the line, this could be any value you want
                                                                                  //data.setValue(annotationRowIndex, 1, xVal.toFixed(2));
                                                                                  
@@ -282,20 +414,50 @@ function drawChart(tid) {
                                                                                  
                                                                                  var unit;
                                                                                  if (drawType == 1) {unit = ' m';}
-                                                                                 if (drawType == 2) {unit = ' m';}
+                                                                                 if (drawType == 2) {unit = ' km';}
                                                                                  if (drawType == 3) {unit = ' km';}
                                                                                  
-                                                                                 data.setValue(annotationRowIndex, 1, data.getValue(id, 2).toFixed(1)+unit);
+                                                                                 //data.setValue(annotationRowIndex, 1, data.getValue(id, 2).toFixed(1)+unit);
                                                                                  
-                                                                                 var position = data.getValue(id,3);
+                                                                                 var position = data.getValue(id,2);
                                                                                  var coordinates = position.split(";");
                                                                                  
                                                                                  var LatLng = new google.maps.LatLng(coordinates[1],coordinates[0]);
                                                                                  marker.setPosition(LatLng);
                                                                                  
-                                                                                 // draw the chart with the new annotation
-                                                                                 chart.draw(data, options);
+                                                                                 var infoBox = document.getElementById('GraphInfoBox');
+                                                                                 
+                                                                                 var infoBoxLine = document.getElementById('GraphInfoBoxLine');
+                                                                                 
+                                                                                 var infoBoxContent;
+                                                                                 var t = data.getValue(id, 0).toFixed(0);
+                                                                                 var formattedTime;
+                                                                                 if (t < 60) {formattedTime = t+' s';}
+                                                                                 if (t >= 60 && t < 3600) {formattedTime = Math.floor(t/60)+' m '+Math.floor((t/60 - Math.floor(t/60))*60)+' s';}
+                                                                                 if (t >= 3600) {formattedTime = Math.floor(t/3600)+' h '+Math.floor((t/3600 - Math.floor(t/3600))*60)+' m '+Math.floor(((t/3600 - Math.floor(t/3600))*60-Math.floor((t/3600 - Math.floor(t/3600))*60))*60)+' s';}
+                                                                                
+                                                                                    //infoBoxContent = "<font size='1'>Zeit: "+formattedTime+'<br>'+'Höhe: '+data.getValue(id, 1).toFixed(1)+unit+'<br>'+coordinates[1]+'  '+coordinates[0]+"</font>";
+                                                                                 
+                                                                                 if (drawType == 1) {
+                                                                                    infoBoxContent = "<font class='GraphInfoFont'>Zeit: "+formattedTime+'  '+'Höhe: '+data.getValue(id, 1).toFixed(1)+unit+"</font>";
                                                                                  }
+                                                                                 else if (drawType == 2) {
+                                                                                    infoBoxContent = "<font class='GraphInfoFont'>Höhe: "+data.getValue(id, 1).toFixed(1)+'m  '+'Distanz: '+data.getValue(id, 0).toFixed(1)+unit+"</font>";
+                                                                                 }
+                                                                                 else if (drawType == 3) {
+                                                                                    infoBoxContent = "<font class='GraphInfoFont'>Zeit: "+formattedTime+'  '+'Distanz: '+data.getValue(id, 1).toFixed(1)+unit+"</font>";
+                                                                                 }
+                                                                                 
+                                                                                 infoBox.innerHTML = infoBoxContent;
+                                                                                 
+                                                                                 infoBoxLine.style.left = xPos+'px';
+                                                                                 
+                                                                                 infoBoxLine.style.display = 'block';
+                                                                                 
+                                                                                 // draw the chart with the new annotation
+                                                                                 //chart.draw(data, options);
+                                                                                 }
+                                                                                 else {document.getElementById('GraphInfoBoxLine').style.display = 'none';}
                                                                                  });
                                                           });
     
@@ -371,7 +533,7 @@ function toggle_dim(width, height, content) {
             {
                 document.getElementById('div_dim_content').innerHTML=xmlhttp.responseText;
                 
-                if (content.indexOf("show_picture.php") > -1) {
+                if (content.indexOf("show_picture.php") > -1 || content.indexOf("show_profile_picture.php") > -1) {
                     var img = new Image();
                     img.onload = function() {
                         var ratio = this.height/this.width;
@@ -434,8 +596,11 @@ function ValidateLogin() {
         if (xmlhttp.readyState==4 && xmlhttp.status==200)
         {
             var UID = xmlhttp.responseText.toString().toLowerCase();
-            if (UID != "false") {
-                document.getElementById('div_dim_content').innerHTML = "Login successful!";
+            if (UID == "verify") {
+                document.getElementById('div_blur_content').innerHTML = "<p align='center' style='margin-top: 100px; margin-right: 0px; margin-left: 0px; margin-bottom: 0px;'><font style='font-family: helvetica; font-size: 18;'>Es scheint als ob du noch nicht verifiziert wurdest. Noch etwas Geduld!</font></p>";
+            }
+            else if (UID != "false") {
+                document.getElementById('div_blur_content').innerHTML = "Login successful!";
                 //document.getElementById('profile_picture').src = "users/" + UID + "/profile.png";
                 document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('users/" + UID + "/profile.png')";
                 document.querySelectorAll('.header_login_text')[0].innerHTML = "<font class='HeaderFont' size='12'><a class='header_link' href='javascript::void()' onclick='logout()'>Ausloggen</a></font>";
@@ -463,9 +628,15 @@ function ValidateLogin() {
                 
                 setCookie("userID",UID,7);
                 
-                toggle_dim();
+                //if (document.getElementById('content_div_blurred_overlay').style.display == "block") {
+                    document.getElementById('content_div_blurred_overlay').style.display = "none";
+                    document.getElementById('content_div_blurred_content').style.display = "none";
+                //}
+                //else {toggle_dim();}
+                
+                document.getElementById('content_div').className = "content_div";
             }
-            else {document.getElementById('div_dim_content').innerHTML = "Login failed!";}
+            else {document.getElementById('div_blur_content').innerHTML = "<p align='center' style='margin-top: 100px; margin-right: 0px; margin-left: 0px; margin-bottom: 0px;'><font style='font-family: helvetica; font-size: 18;'>Oops, Login ist fehlgeschlagen. &Uuml;berpr&uuml;fe deine e-Mail Adresse und Passwort</font></p>";}
         }
         else {document.getElementById('div_dim_content').innerHTML = "There was a problem verifying the user.";}
     }
@@ -483,13 +654,13 @@ function InsertNewUser() {
     var allOK = true;
     
     if (firstName.value == "Vorname") {firstName.style.borderColor = 'red'; allOK = false;}
-    else {firstName.style.borderColor = '#C9C9C9';}
+    else {firstName.style.borderColor = '#A4A4A4';}
     if (lastName.value == "Nachname") {lastName.style.borderColor = 'red'; allOK = false;}
-    else {lastName.style.borderColor = '#C9C9C9';}
+    else {lastName.style.borderColor = '#A4A4A4';}
     if (email.value == "E-Mail") {email.style.borderColor = 'red'; allOK = false;}
-    else {email.style.borderColor = '#C9C9C9';}
+    else {email.style.borderColor = '#A4A4A4';}
     if (password.value == "Passwort") {password.style.borderColor = 'red'; allOK = false;}
-    else {password.style.borderColor = '#C9C9C9';}
+    else {password.style.borderColor = '#A4A4A4';}
     if (!profilePicture.value) {document.getElementById('div_loading').innerHTML = "<font style='font-family: helvetica; font-size: 12px; color: #ff0000;'>W&auml;hle noch ein Profilbild</font>"; allOK = false;}
     else {document.getElementById('div_loading').innerHTML = "";}
     
@@ -514,20 +685,22 @@ function InsertNewUser() {
             var UID = xmlhttp.responseText.toString().toLowerCase();
             if (UID != "false") {
                 //document.getElementById('div_dim_content').innerHTML = "Login successful!";
-                document.getElementById('div_dim_content').innerHTML = "<p align='center' style='margin-top: 20px; margin-bottom: 10px;'><img src='http://www.xtour.ch/users/" + UID + "/profile.png' width='80'></p><p align='center'><font style='font-family: helvetica; font-size: 14;'>Willkommen auf XTour " + firstName.value + "!</font></p>";
+                document.getElementById('div_blur_content').innerHTML = "<p align='center' style='margin-top: 20px; margin-bottom: 10px;'><img src='http://www.xtour.ch/users/" + UID + "/profile.png' width='80'></p><p align='center'><font style='font-family: helvetica; font-size: 14;'>Willkommen auf XTour " + firstName.value + "!<br><br>Bevor es weiter geht, m&uuml;ssen wir dich erst verifiziern. Du wirst n&auml;chstens eine e-Mail erhalten mit den weiteren Schritten zur Installation der App</font></p>";
                 //document.getElementById('profile_picture').src = "users/" + UID + "/profile.png";
-                document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('users/" + UID + "/profile.png')";
-                document.querySelectorAll('.header_login_text')[0].innerHTML = "<font class='HeaderFont' size='12'><a class='header_link' href='javascript::void()' onclick='logout()'>Ausloggen</a></font>";
+                //document.querySelectorAll('.header_login_icon')[0].style.backgroundImage = "url('users/" + UID + "/profile.png')";
+                //document.querySelectorAll('.header_login_text')[0].innerHTML = "<font class='HeaderFont' size='12'><a class='header_link' href='javascript::void()' onclick='logout()'>Ausloggen</a></font>";
                 
-                var commentImg = document.querySelectorAll('.comment_img_div');
+                /*var commentImg = document.querySelectorAll('.comment_img_div');
                 
                 for (var i = 0; i < commentImg.length; i++) {
                     commentImg[i].style.backgroundImage = "url('users/"+UID+"/profile.png')";
-                }
+                }*/
                 
-                setCookie("userID",UID,7);
+                //setCookie("userID",UID,7);
                 
                 //toggle_dim();
+                
+                RunScript("send_mail.php?to=manuel.wbr@gmail.com&subject=Neuer Benutzer&message="+firstName.value+" "+lastName.value+" ("+email.value+") hat sich angemeldet");
             }
             else {document.getElementById('div_dim_content').innerHTML = "Login failed!";}
         }
@@ -554,6 +727,37 @@ function LoadMainDiv(content, tid, file) {
         {
             document.getElementById('MainContent').innerHTML=xmlhttp.responseText;
             if (content.indexOf("tour_details.php") > -1 && tid) {initialize(file, tid); drawChart(tid);}
+        }
+    }
+    xmlhttp.open('GET',content,true);
+    xmlhttp.send();
+}
+
+function LoadMoreNewsFeeds()
+{
+    if (document.getElementsByClassName('feedbox_div').length == 0) {return;}
+    
+    document.getElementById("LoadMoreDiv").style.display = "block";
+    
+    var numElements = document.getElementsByClassName('feedbox_div').length;
+    
+    var content = "http://www.xtour.ch/news_feed.php?start=" + numElements;
+    
+    if (window.XMLHttpRequest)
+    {// code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp=new XMLHttpRequest();
+    }
+    else
+    {// code for IE6, IE5
+        xmlhttp=new ActiveXObject('Microsoft.XMLHTTP');
+    }
+    xmlhttp.onreadystatechange=function()
+    {
+        if (xmlhttp.readyState==4 && xmlhttp.status==200)
+        {
+            document.getElementById('MainContent').innerHTML+=xmlhttp.responseText;
+            
+            document.getElementById('LoadMoreDiv').style.display = "none";
         }
     }
     xmlhttp.open('GET',content,true);
@@ -604,6 +808,9 @@ function ShowTourDetails(e, tid)
     if (el == 'textarea' || el == 'a') {return;}
     if (el == 'img' && (e.target.id == 'feedbox_close' || e.srcElement.id == 'feedbox_close')) {return;}
     if (el == 'img' && (e.target.id == 'feedbox_hide' || e.srcElement.id == 'feedbox_hide')) {return;}
+    if (el == 'img' && (e.target.id == 'profile_picure' || e.srcElement.id == 'profile_picture')) {return;}
+    if (el == 'img' && (e.target.id == 'comment_edit' || e.srcElement.id == 'comment_edit')) {return;}
+    if (el == 'img' && (e.target.id == 'comment_delete' || e.srcElement.id == 'comment_delete')) {return;}
     
     var content = "tour_details.php?tid=" + tid;
     var hist = "/tours/" + tid;
@@ -622,6 +829,15 @@ function ShowTourDetails(e, tid)
     AddHistoryEntry(hist);
 }
 
+function ShowUserDetails(uid)
+{
+    var content = "user_info.php?uid=" + uid;
+    var hist = "/user/" + uid;
+    
+    LoadMainDiv(content);
+    AddHistoryEntry(hist);
+}
+
 function textarea_resize(t) {
     var offset= !window.opera ? (t.offsetHeight - t.clientHeight) : (t.offsetHeight + parseInt(window.getComputedStyle(t, null).getPropertyValue('border-top-width'))) ;
     
@@ -629,7 +845,7 @@ function textarea_resize(t) {
     t.style.height = (t.scrollHeight  + offset ) + 'px';
 }
 
-function captureEnter(event, tid, width, comment)
+function captureEnter(event, tid, width, marginLeft, comment)
 {
     if (event.keyCode == 13 && event.shiftKey) {
         var d = new Date();
@@ -661,19 +877,62 @@ function captureEnter(event, tid, width, comment)
             img = "http://www.xtour.ch/users/"+UID+"/profile.png";
         }
         
-        var content = "<div class='comment_container_div'>\n";
-        content += "<div class='comment_img_div2'><img src='" + img + "' width='30'></div>\n";
-        content += "<div class='comment_edit_icons'><img src='http://www.xtour.ch/images/edit_icon.png' width='10'><img src='http://www.xtour.ch/images/close_icon.png' width='10'></div>\n";
-        content += "<div class='comment_header_div'><font class='CommentHeaderFont'>" + name + " am " + formattedDate + "</font></div>\n";
-        content += "<div class='comment_content_div'>\n";
-        content += "<font class='CommentFont'>" + comment_text + "</font>";
-        content += "</div>\n";
-        content += "</div>\n";
-        
-        var e = "#" + tid + "_div_comment";
-        $(content).hide().appendTo(e).fadeIn(1000);
-        
-        comment.value = "";
+        if (tid.indexOf("comment_") != -1) {
+            var commentDiv = document.getElementById(tid);
+            
+            commentDiv.style.borderColor = '#dbdbdb';
+            
+            var content = "<div class='comment_img_div2'><img src='" + img + "' width='30'></div>\n";
+            content += "<div class='comment_edit_icons'><img src='http://www.xtour.ch/images/edit_icon.png' width='10'><img src='http://www.xtour.ch/images/close_icon.png' width='10'></div>\n";
+            content += "<div class='comment_header_div'><font class='CommentHeaderFont'>" + name + " am " + formattedDate + "</font></div>\n";
+            content += "<div class='comment_content_div'>\n";
+            content += "<font class='CommentFont'>" + comment_text + "</font>";
+            content += "</div>\n";
+            
+            commentDiv.innerHTML = content;
+            
+            var id = tid.substring(8);
+            
+            var cmd = "http://www.xtour.ch/enter_edited_comment.php?tid="+id+"&comment="+encodeURIComponent(comment_text)+"&date="+d.getTime();
+            
+            RunScript(cmd);
+        }
+        else if (tid.indexOf("description_") != -1) {
+            var descriptionDiv = document.getElementById(tid);
+            
+            descriptionDiv.setAttribute("style","border-top-style: solid; height: 40px");
+            
+            var content = "<font class='TourDescriptionFont'>" + comment_text + "</font>\n";
+            
+            descriptionDiv.innerHTML = content;
+            
+            var id = tid.substring(12);
+            
+            var cmd = "http://www.xtour.ch/update_description.php?tid="+id+"&description="+encodeURIComponent(comment_text);
+            
+            RunScript(cmd);
+        }
+        else {
+            var content = "<div class='comment_container_div' style='width: " + width + "px; margin-left: " + marginLeft + "px;'>\n";
+            content += "<div class='comment_img_div2'><img src='" + img + "' width='30'></div>\n";
+            content += "<div class='comment_edit_icons'><img src='http://www.xtour.ch/images/edit_icon.png' width='10'><img src='http://www.xtour.ch/images/close_icon.png' width='10'></div>\n";
+            content += "<div class='comment_header_div'><font class='CommentHeaderFont'>" + name + " am " + formattedDate + "</font></div>\n";
+            content += "<div class='comment_content_div'>\n";
+            content += "<font class='CommentFont'>" + comment_text + "</font>";
+            content += "</div>\n";
+            content += "</div>\n";
+            
+            content += "<p style='margin-top: 0px; margin-bottom: 20px;'></p>\n";
+            
+            var e = "#" + tid + "_div_comment";
+            $(content).hide().appendTo(e).fadeIn(1000);
+            
+            comment.value = "";
+            
+            var cmd = "http://www.xtour.ch/enter_new_comment.php?tid="+tid+"&uid="+UID+"&name="+name+"&comment="+encodeURIComponent(comment_text)+"&date="+d.getTime();
+            
+            RunScript(cmd);
+        }
     }
 }
 
@@ -786,7 +1045,7 @@ function MoveTabDiv(id, position)
         //valueElements[i].style.visibility= "hidden";
     }
     
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 8; i++) {
         var elementID = "timeline_value_div" + i + id;
         var e = "#"+elementID;
         $(e).fadeIn(600);
@@ -838,6 +1097,33 @@ function DeleteTour(tid)
     }
 }
 
+function DeleteComment(id)
+{
+    if (confirm(unescape("Bist du sicher, dass du den Kommentar l%F6schen willst?"))) {
+        RunScript("http://www.xtour.ch/delete_comment.php?id="+id);
+        
+        var e = "#comment_" + id;
+        $(e).fadeTo(800, 0, function() {
+                    $(e).animate({height:'0'},300,'swing',function() {$(e).hide();});
+                    });
+    }
+}
+
+function EditComment(id, width, marginLeft, comment, img, tid)
+{
+    var commentContainer = document.getElementById('comment_'+id);
+    
+    var height = commentContainer.clientHeight;
+    
+    commentContainer.innerHTML = "";
+    commentContainer.setAttribute("style","width: "+width+"px; height: "+height+"px; margin-left: "+marginLeft+"px; border-color: #e4ad44;");
+    commentContainer.style.height = height;
+    commentContainer.innerHTML = "<div class='comment_img_div' style='background-image: url(\"" + img + "\")'></div>\n";
+    commentContainer.innerHTML += "<div class='comment_content_textfield_div'>\n";
+    commentContainer.innerHTML += "<textarea class='CommentTextarea' style='width: 411px; margin-left: 17px; margin-right: 5px; margin-top: 5px; margin-bottom: 5px;' placeholder='Kommentar schreiben' onkeypress='captureEnter(event,\"comment_" + id + "\","+width+","+marginLeft+",this)'>" + comment + "</textarea>";
+    commentContainer.innerHTML += "</div>\n";
+}
+
 function HideTour(tid)
 {
     RunScript("hide_tour.php?tid="+tid);
@@ -882,7 +1168,10 @@ function ShowImageDetail(e, id, column, image, imgDate, lat, lon, elevation, com
     var imageDivContent = imageDiv.innerHTML;
     if (imageDivContent.search(image) > 0) {imageDiv.innerHTML = ""; imageDiv.style.display = "none"; return;}
     
-    imageDiv.innerHTML = "<div class='image_detail_div_overlay' id='imageViewDetail_"+id+"' style='width: "+(width-18)+"px'><div style='position: absolute;'><img src='http://www.xtour.ch/images/compass_icon_white.png' width='50'></div><div style='position: absolute; margin-left: 55px;'><font class='ImageDetailDescriptionFont'>"+lat+"<br>"+lon+"</font></div><div style='position: absolute; margin-left: 5px; bottom: 5px; width: "+(width-30)+"px; height: 80px'><font class='ImageDetailDescriptionFont' style='font-size: 12'>"+comment+"</font></div></div><img src='"+image+"' width="+(width-2)+" style='border-style: solid; border-width: 1px; border-color: #000000'>";
+    var lattitude = GetFormattedLatitude(lat);
+    var longitude = GetFormattedLongitude(lon);
+    
+    imageDiv.innerHTML = "<div class='image_detail_div_overlay' id='imageViewDetail_"+id+"' style='width: "+(width-18)+"px'><div style='position: absolute;'><img src='http://www.xtour.ch/images/compass_icon_white.png' width='20'></div><div style='position: absolute; margin-left: 25px;'><font class='ImageDetailDescriptionFont'>"+lattitude+" &middot; "+longitude+" &middot "+Math.round(elevation)+" m&uuml;m</font></div><div style='position: absolute; right: 5px;'><font class='ImageDetailDescriptionFont'>"+imgDate+"</font></div><div style='position: absolute; margin-left: 5px; bottom: 5px; width: "+(width-30)+"px; height: 80px'><font class='ImageDetailDescriptionFont' style='font-size: 12'>"+comment+"</font></div></div><img src='"+image+"' width="+(width-2)+" style='border-style: solid; border-width: 1px; border-color: #000000'>";
     
     imageDiv.style.display = "inline-block";
     
@@ -909,28 +1198,28 @@ function HideImageDetailDescription(e)
 
 function GetFormattedLatitude(lat)
 {
-    var degrees = floor(lat);
-    var minutes = floor((lat-degrees)*60);
-    var seconds = round(((lat-degrees)*60-minutes)*60);
+    var degrees = Math.floor(Math.abs(lat));
+    var minutes = Math.floor((Math.abs(lat)-degrees)*60);
+    var seconds = Math.round(((Math.abs(lat)-degrees)*60-minutes)*60);
     
     var NS = "N";
     if (lat < 0) {NS = "S";}
     
-    var formattedLat = degrees+"°"+minutes+"\""+seconds+"\"\""+NS;
+    var formattedLat = degrees+"&deg "+minutes+"\' "+seconds+"\'\' "+NS;
     
     return formattedLat;
 }
 
 function GetFormattedLongitude(lon)
 {
-    var degrees = floor(lon);
-    var minutes = floor((lon-degrees)*60);
-    var seconds = round(((lon-degrees)*60-minutes)*60);
+    var degrees = Math.floor(Math.abs(lon));
+    var minutes = Math.floor((Math.abs(lon)-degrees)*60);
+    var seconds = Math.round(((Math.abs(lon)-degrees)*60-minutes)*60);
     
     var EW = "E";
     if (lon < 0) {EW = "W";}
     
-    var formattedLon = degrees+"°"+minutes+"\""+seconds+"\"\""+EW;
+    var formattedLon = degrees+"&deg "+minutes+"\' "+seconds+"\'\' "+EW;
     
     return formattedLon;
 }
@@ -976,4 +1265,64 @@ function logout() {
     }
     
     document.cookie = "userID=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+}
+
+function ShowLogin() {
+    var element = document.getElementById('div_blur_content');
+    
+    var content = "";
+    content += "<p style='margin-top: 100px'></p>\n";
+    content += "<table align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+    content += "<tr>\n";
+    content += "<td align='center'>\n";
+    content += "<form action='javascript:ValidateLogin();'>\n";
+    content += "<input class='InputField' id='login_user' type='text' width='100' name='username' value='Benutzername' style='color:#cbcbcb' onfocus=\"if(this.value=='Benutzername') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Benutzername', this.style.color='#cbcbcb';}\"><br><br>\n";
+    content += "<input class='InputField' id='login_pwd' type='password' width='100' name='pwd' value='Passwort' style='color:#cbcbcb' onfocus=\"if(this.value=='Passwort') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Passwort', this.style.color='#cbcbcb';}\"><br><br>\n";
+    content += "<input type='submit' value='Einloggen' class='InputButton'>\n";
+    content += "</form>\n";
+    content += "</td>\n";
+    content += "</tr>\n";
+    content += "</table>\n";
+    content += "<p style='margin-top: 10px'></p>\n";
+    
+    element.innerHTML = content;
+}
+
+function ShowRegister() {
+    var element = document.getElementById('div_blur_content');
+    
+    var content = "";
+    content += "<p style='margin-top: 10px; margin-right: 0px; margin-left: 0px; margin-bottom: 0px;'></p>\n";
+    content += "<table width='100%' align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+    content += "<tr>\n";
+    content += "<td width='70px' align='left' valign='middle' style='padding-left: 10px;'>\n";
+    content += "<div class='FileUploadWrapper' id='file_upload_wrapper'>\n";
+    content += "<form id='PictureUploadForm' action='upload.php' method='post' enctype='multipart/form-data' target='upload_target'>\n";
+    content += "<input class='FileUpload' type='file' name='picture' onchange='FileUploadSubmit()'>\n";
+    content += "</form>\n";
+    content += "<iframe id='upload_target' name='upload_target' style='width:0;height:0;border:0px solid #fff;'></iframe>\n";
+    content += "</div>\n";
+    content += "</td>\n";
+    content += "<td align='center' valign='middle'>\n";
+    content += "<div class='DivLoading' id='div_loading'></div>\n";
+    content += "</td>\n";
+    content += "<td width='70px'></td>\n";
+    content += "</tr>\n";
+    content += "</table>\n";
+    
+    content += "<table align='center' border='0' cellpadding='0' cellspacing='0'>\n";
+    content += "<tr>\n";
+    content += "<td align='center'>\n";
+    content += "<p style='margin-top: 10px'><input class='InputField' id='input_firstName' type='text' width='100' name='FirstName' value='Vorname' style='color:#cbcbcb' onfocus=\"if(this.value=='Vorname') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Vorname', this.style.color='#cbcbcb';}\"></p>\n";
+    content += "<p style='margin-top: 10px'><input class='InputField' id='input_lastName' type='text' width='100' name='LastName' value='Nachname' style='color:#cbcbcb' onfocus=\"if(this.value=='Nachname') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Nachname', this.style.color='#cbcbcb';}\"></p>\n";
+    content += "<p style='margin-top: 10px'><input class='InputField' id='input_email' type='text' width='100' name='EMail' value='E-Mail' style='color:#cbcbcb' onfocus=\"if(this.value=='E-Mail') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='E-Mail', this.style.color='#cbcbcb';}\"></p>\n";
+    content += "<p style='margin-top: 10px'><input class='InputField' id='input_password' type='password' width='100' name='pwd' value='Passwort' style='color:#cbcbcb' onfocus=\"if(this.value=='Passwort') {this.value='', this.style.color='#595959'};\" onblur=\"if(this.value=='') {this.value='Passwort', this.style.color='#cbcbcb';}\"></p>\n";
+    content += "<input type='hidden' id='input_image_filename' name='ProfilePicture'>\n";
+    content += "<p style='margin-top: 10px'><input class='InputButton' type='submit' value='Anmelden' onclick='InsertNewUser()'></p>\n";
+    content += "</td>\n";
+    content += "</tr>\n";
+    content += "</table>\n";
+    content += "<p style='margin-top: 10px'></p>\n";
+    
+    element.innerHTML = content;
 }

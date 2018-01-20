@@ -8,10 +8,12 @@
     $db = new XTDatabase();
     
     $db->Connect();
-    if (!$db->DeleteTour($tour_id)) {return 0;}
+    if (!$db->DeleteTour($tour_id)) {echo "false"; return 0;}
     
     $utilities = new XTUtilities();
-    if (!$utilities->DeleteDirectoryForTour($tour_id)) {return 0;}
+    if (!$utilities->DeleteDirectoryForTour($tour_id)) {echo "false"; return 0;}
+    
+    echo "true";
     
     return 1;
     

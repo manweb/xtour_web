@@ -9,7 +9,10 @@
     
     if (!$DB->Connect()) {echo "false"; return 0;}
     
-    if (!$DB->VerifyUser($uid, $pwd)) {echo "false"; return 0;}
+    $verify = $DB->VerifyUser($uid, $pwd);
+    
+    if ($verify == 0) {echo "false"; return 0;}
+    elseif ($verify == 2) {echo "verify"; return 1;}
     
     $userID = $DB->GetUserID($uid);
     

@@ -7,7 +7,7 @@
     
     $utilities = new XTUtilities();
     
-    $path = $utilities->GetTourPath();
+    $path = $utilities->GetTourPath($tourID);
     
     $plot = new XTDataPlot();
     

@@ -9,7 +9,7 @@
     $type = $_GET['type'];
     $uid = $utilities->GetUserIDFromTour($tid);
     
-    $file = "users/".$uid."/tours/".$tid."/".$tid."_up1.gpx";
+    $file = "users/".$uid."/tours/".$tid."/".$tid."_sum0.gpx";
     
     if (!file_exists($file)) {$file = "users/".$uid."/tours/".$tid."/".$tid."_down1.gpx";}
     

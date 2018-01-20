@@ -12,7 +12,7 @@
     
     if (!$db->Connect()) {return 0;}
     
-    $db->InsertComment($tid,$uid,$name,$comment,$date);
+    $db->InsertComment($tid,$uid,$name,addslashes($comment),$date);
     
     return 1;
 ?>

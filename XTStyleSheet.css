@@ -111,6 +111,57 @@ a:hover {
     position: absolute;
 }
 
+.content_div
+{
+    width: 100%;
+    margin: 0px 0px 0px 0px;
+    border: none;
+    position: absolute;
+    z-index: 0;
+}
+
+.content_div_blurred
+{
+    width: 100%;
+    margin: 0px 0px 0px 0px;
+    border: none;
+    position: absolute;
+    z-index: 0;
+    
+    filter: blur(3px);
+    -webkit-filter: blur(3px);
+    -moz-filter: blur(3px);
+    -o-filter: blur(3px);
+    -ms-filter: blur(3px);
+}
+
+.content_div_blurred_overlay
+{
+    background-color: rgba(0, 0, 0, 0.2);
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    bottom: 0px;
+    border: none;
+    position: fixed;
+    z-index: 200;
+    display: block;
+}
+
+.content_div_blurred_content
+{
+    background-color: #ffffff;
+    box-shadow: 5px 5px 5px #888888;
+    width: 100%;
+    height: 300px;
+    top: 50%;
+    margin-top: -150px;
+    border: none;
+    position: absolute;
+    z-index: 201;
+    display: block;
+}
+
 .feedbox_div {
     position: relative;
     border: 1px solid;
@@ -499,7 +550,13 @@ a:hover {
     top: 0;
     bottom: 0;
     position: fixed;
-    z-index: 101;
+    z-index: 121;
+    
+    filter: blur(2px);
+    -webkit-filter: blur(2px);
+    -moz-filter: blur(2px);
+    -o-filter: blur(2px);
+    -ms-filter: blur(2px);
 }
 
 .div_overlay_box
@@ -513,7 +570,7 @@ a:hover {
     margin-top: -150px;
     position: fixed;
     display: none;
-    z-index: 102;
+    z-index: 122;
     transition: width .5s ease, height .5s ease, margin-left .5s ease, margin-top .5s ease;
     -moz-transition: width .5s ease, height .5s ease, margin-left .5s ease, margin-top .5s ease; /* Firefox 4 */
     -webkit-transition: width .5s ease, height .5s ease, margin-left .5s ease, margin-top .5s ease; /* Safari and Chrome */
@@ -641,6 +698,23 @@ a:hover {
     width: 100%;
 }
 
+.div_tour_description_empty
+{
+    position: relative;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 40px;
+    margin-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-top-style: none;
+    border-top-width: 1px;
+    border-color: #cfcfcf;
+    overflow: hidden;
+}
+
 .image_detail_div
 {
     position: relative;
@@ -675,7 +749,7 @@ a:hover {
 {
     border-style: solid;
     border-width: 2px;
-    border-color: #C9C9C9;
+    border-color: #A4A4A4;
     font-family: helvetica, arial, sans serif;
     font-size: 12;
     padding-left: 0px;
@@ -687,16 +761,14 @@ a:hover {
 .InputButton
 {
     background-color:	#478ec9;
-	height:			25px;
-	width:			80px;
+	height:			30px;
+	width:			100px;
 	border:			none;
     font-family: helvetica;
-    font-size: 12;
+    font-size: 15;
     color: #ffffff;
     outline:none;
-    border-style: none none solid none;
-    border-bottom-width: 1px;
-    border-bottom-color: #2f5370;
+    border-radius: 15px;
 }
 
 .SubmitButton
@@ -721,6 +793,14 @@ a:hover {
     color: #ffffff;
 }
 
+.NewsFeedFont
+{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 11;
+    font-weight: 150;
+    color: #2f2f2f;
+}
+
 .TourDetailFont
 {
     font-family: helvetica, sans-serif;
@@ -734,7 +814,7 @@ a:hover {
     font-family: helvetica, sans-serif;
     font-size: 10;
     font-weight: 100;
-    color: #C9C9C9;
+    color: #969696;
 }
 
 .CommentFont
@@ -756,7 +836,7 @@ a:hover {
 {
     font-family: helvetica, sans-serif;
     font-size: 12;
-    color: #C9C9C9;
+    color: #969696;
 }
 
 .TimeLineFontDetail
@@ -775,16 +855,25 @@ a:hover {
 
 .TourDescriptionFont
 {
-    font-family: helvetica, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12;
-    color: #C9C9C9;
+    font-weight: 150;
+    color: #969696;
 }
 
 .ImageDetailDescriptionFont
 {
     font-family: helvetica, sans-serif;
-    font-size: 20;
+    font-size: 12;
     color: #ffffff;
+}
+
+.GraphInfoFont
+{
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12;
+    font-weight: 150;
+    color: #969696;
 }
 
 .CommentTextarea
@@ -800,6 +889,22 @@ a:hover {
     background-color: #ffffff;
     outline: none;
     resize: none;
+}
+
+.DescriptionTextarea
+{
+    width: 100%;
+    height: 40px;
+    font-family: helvetica, sans-serif;
+    font-size: 12;
+    border: dashed 2px #dbdbdb;
+    background-color: #ffffff;
+    outline: none;
+    resize: none;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 5px;
 }
 
 .FileUploadWrapper
@@ -870,4 +975,22 @@ a:hover {
     height: 45px;
     text-align: center;
     line-height: 45px;
+}
+
+.div_overlay_blur
+{
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    position: fixed;
+    z-index: 200;
+    
+    filter: blur(2px);
+    -webkit-filter: blur(2px);
+    -moz-filter: blur(2px);
+    -o-filter: blur(2px);
+    -ms-filter: blur(2px);
 }
